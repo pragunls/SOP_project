@@ -1,0 +1,91 @@
+/* ============================================================
+   SOP Portal — Sidebar Component
+   ============================================================ */
+
+import { AppState } from '../state.js';
+import { icons } from './icons.js';
+
+const NAV_ITEMS = [
+  { id: 'dashboard',         label: 'Dashboard',          hash: '#dashboard',  icon: 'dashboard' },
+  { id: 'new-sop',           label: 'New SOP',            hash: '#new-sop',    icon: 'plus-circle' },
+  { id: 'my-sops',           label: 'My SOPs',            hash: '#my-sops',    icon: 'file-text' },
+  { id: 'pending-approvals', label: 'Pending Approvals',  hash: '#pending',    icon: 'clock' },
+  { id: 'admin',             label: 'Admin',              hash: '#admin',      icon: 'settings-2' },
+  { id: 'settings',          label: 'Settings',           hash: '#settings',   icon: 'settings' },
+];
+
+export function initSidebar() {
+  const sidebarEl = document.getElementById('sidebar');
+  const mainEl    = document.getElementById('main-content');
+  const toggleBtn = document.getElementById('sidebar-toggle');
+  const overlay   = document.getElementById('sidebar-overlay');
+  const hamburger = document.getElementById('hamburger-btn');
+
+  renderNavItems(sidebarEl);
+  renderUserCard(sidebarEl);
+
+  // Desktop collapse toggle
+  toggleBtn?.addEventListener('click', () => {
+    sidebarEl.classList.toggle('collapsed');
+    mainEl?.classList.toggle('sidebar-collapsed');
+    const isCollapsed = sidebarEl.classList.contains('collapsed');
+    toggleBtn.innerHTML = isCollapsed ? icons.chevronRight : icons.chevronLeft;
+    toggleBtn.setAttribute('aria-label', isCollapsed ? 'Expand sidebar' : 'Collapse sidebar');
+  });
+
+  // Mobile hamburger
+  hamburger?.addEventListener('click', () => {
+    sidebarEl.classList.add('mobile-open');
+    overlay?.classList.add('visible');
+  });
+
+  overlay?.addEventListener('click', () => {
+    sidebarEl.classList.remove('mobile-open');
+    overlay.classList.remove('visible');
+  });
+
+  // Update active item on hash change
+  window.addEventListener('hashchange', () => updateActiveNav());
+  updateActiveNav();
+}
+
+function renderNavItems(sidebar) {
+  const nav = sidebar.querySelector('.sidebar-nav');
+  if (!nav) return;
+
+  NAV_ITEMS.forEach(item => {
+    const el = document.createElement('a');
+    el.className = 'nav-item';
+    el.href = item.hash;
+    el.dataset.nav = item.id;
+    el.setAttribute('aria-label', item.label);
+    el.innerHTML = `
+      <span class="nav-item-icon" aria-hidden="true">${icons[item.icon] || icons.circle}</span>
+      <span class="nav-item-label">${item.label}</span>
+    `;
+    nav.appendChild(el);
+  });
+}
+
+function renderUserCard(sidebar) {
+  const userCard = sidebar.querySelector('.sidebar-user');
+  if (!userCard) return;
+  const u = AppState.currentUser;
+  userCard.innerHTML = `
+    <div class="user-avatar" aria-hidden="true" style="width:32px;height:32px;font-size:13px;">${u.initials}</div>
+    <div class="sidebar-user-info">
+      <div class="sidebar-user-name">${u.name}</div>
+      <div class="sidebar-user-role">${u.role}</div>
+    </div>
+  `;
+}
+
+function updateActiveNav() {
+  const hash = window.location.hash || '#dashboard';
+  document.querySelectorAll('.nav-item[data-nav]').forEach(el => {
+    const isActive = el.getAttribute('href') === hash ||
+      (hash.startsWith('#sop/') && el.dataset.nav === 'dashboard');
+    el.classList.toggle('active', isActive);
+    el.setAttribute('aria-current', isActive ? 'page' : 'false');
+  });
+}

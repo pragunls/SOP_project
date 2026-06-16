@@ -1,0 +1,271 @@
+/* ============================================================
+   SOP Portal — SOP Detail View Styles
+   ============================================================ */
+
+.sop-detail-header {
+  margin-bottom: var(--space-6);
+}
+
+.sop-detail-number {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  margin-bottom: 4px;
+}
+
+.sop-detail-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.sop-detail-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  flex: 1;
+}
+
+.sop-detail-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+/* Overview Tab */
+.detail-overview-grid {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: var(--space-6);
+  align-items: start;
+}
+
+@media (max-width: 960px) {
+  .detail-overview-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.metadata-card {
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  padding: var(--space-5);
+}
+
+.metadata-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+}
+
+.metadata-item {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.metadata-label {
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-secondary);
+}
+
+.metadata-value {
+  font-size: 14px;
+  color: var(--color-text-primary);
+  font-weight: 500;
+}
+
+.metadata-value.mono {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-primary);
+}
+
+.tags-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: 4px;
+}
+
+/* Score Card */
+.score-card {
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  padding: var(--space-5);
+}
+
+.score-components-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.score-component-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+}
+
+.score-component-name {
+  color: var(--color-text-secondary);
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.score-component-val {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.score-total-display {
+  text-align: center;
+  padding: var(--space-4) 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.score-total-number {
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--color-primary);
+  line-height: 1;
+}
+
+.score-total-label {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  margin-top: 4px;
+}
+
+/* Sections Tab */
+.detail-component {
+  margin-bottom: var(--space-4);
+  position: relative;
+}
+
+.component-value-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 26px;
+  height: 26px;
+  background: var(--color-primary);
+  color: #FFFFFF;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  border: 2px solid var(--color-surface);
+  z-index: 5;
+}
+
+.detail-component-text {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--color-text-primary);
+}
+
+.detail-component-text h1,
+.detail-component-text h2,
+.detail-component-text h3 {
+  margin-bottom: var(--space-3);
+}
+
+.detail-component-text ul,
+.detail-component-text ol {
+  padding-left: var(--space-5);
+  margin-bottom: var(--space-3);
+}
+
+.detail-component-text ul { list-style: disc; }
+.detail-component-text ol { list-style: decimal; }
+
+.detail-component-img {
+  max-width: 100%;
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--space-2);
+}
+
+.component-caption {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  font-style: italic;
+  text-align: center;
+}
+
+.detail-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.detail-table th {
+  background: var(--color-primary-light);
+  font-weight: 600;
+  padding: var(--space-3) var(--space-4);
+  text-align: left;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-primary);
+}
+
+.detail-table td {
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-primary);
+}
+
+.detail-table tbody tr:nth-child(even) {
+  background: var(--color-bg);
+}
+
+/* Approval Status Tab */
+.approval-actions-row {
+  display: flex;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}
+
+/* Revision History Tab */
+.revision-table th {
+  padding: 10px var(--space-4);
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  background: var(--color-bg);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.revision-table td {
+  padding: var(--space-3) var(--space-4);
+  font-size: 14px;
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: middle;
+}
