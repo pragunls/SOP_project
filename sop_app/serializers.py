@@ -3,18 +3,6 @@ from django.contrib.auth.models import User
 from .models import SOP, SOPSection, SOPComponent, ApprovalStep, Notification, Refinery, Department, ProcessUnit
 
 
-def serialize_user(user):
-    if not user:
-        return None
-    initials = ''.join(p[0].upper() for p in user.get_full_name().split() if p) or user.username[0].upper()
-    return {
-        'id': user.id,
-        'name': user.get_full_name() or user.username,
-        'email': user.email,
-        'initials': initials,
-    }
-
-
 def serialize_component(comp):
     import json as _json
     steps = None

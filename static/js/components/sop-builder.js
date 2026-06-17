@@ -6,7 +6,6 @@
    ============================================================ */
 
 import { AppState } from '../state.js';
-import { icons }    from './icons.js';
 import { api }      from '../utils/api.js';
 import { toast }    from '../utils/toast.js';
 

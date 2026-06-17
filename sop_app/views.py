@@ -1,6 +1,5 @@
 import json
 import logging
-from datetime import date
 
 from django.http import JsonResponse, HttpResponse
 from django.views import View
@@ -13,7 +12,7 @@ from django.shortcuts import get_object_or_404
 from .models import SOP, SOPSection, SOPComponent, ApprovalStep, Notification, Refinery, Department, ProcessUnit
 from .serializers import (
     serialize_sop_list, serialize_sop_detail,
-    serialize_notification, serialize_approval_step
+    serialize_notification,
 )
 from .document_parser import parse_document
 from .pdf_generator import generate_sop_pdf

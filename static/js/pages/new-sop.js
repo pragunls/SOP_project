@@ -1,14 +1,15 @@
 /* ============================================================
    SOP Portal — New SOP Page (Multi-Step Wizard)
+   Steps: 1 Location → 2 Unit → 3 Build SOP → 4 Review & Submit
    ============================================================ */
 
-import { AppState } from '../state.js';
-import { icons } from '../components/icons.js';
+import { AppState }        from '../state.js';
+import { icons }           from '../components/icons.js';
 import { renderWizardSteps, showWizardStep } from '../components/wizard.js';
-import { renderSopBuilder } from '../components/sop-builder.js';
+import { renderSopBuilder }   from '../components/sop-builder.js';
 import { renderApprovalChain } from '../components/approval-chain.js';
-import { toast } from '../utils/toast.js';
-import { api } from '../utils/api.js';
+import { toast }           from '../utils/toast.js';
+import { api }             from '../utils/api.js';
 
 export function renderNewSop(container) {
   AppState.resetDraft();
@@ -21,7 +22,6 @@ export function renderNewSop(container) {
       <span class="breadcrumb-item active">New SOP</span>
     </nav>
 
-    <!-- Step Indicator -->
     <div class="wizard-steps-card" id="wizard-steps-card"></div>
 
     <!-- Step 1: Location -->
@@ -29,7 +29,6 @@ export function renderNewSop(container) {
       <div class="wizard-card">
         <h1 class="wizard-card-title">Select Refinery &amp; Department</h1>
         <div class="step1-grid">
-          <!-- Refinery -->
           <div>
             <div class="input-wrapper" style="margin-bottom:0;">
               <label class="input-label" id="refinery-label">Refinery</label>
@@ -55,17 +54,15 @@ export function renderNewSop(container) {
                           <div class="custom-dropdown-option-sub">${escapeHtml(r.state)}</div>
                         </div>
                         <span style="display:none;color:var(--color-primary);">${icons.check.replace('width="20"','width="14"').replace('height="20"','height="14"')}</span>
-                      </div>
-                    `).join('')}
+                      </div>`).join('')}
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Department -->
           <div>
-            <div class="input-wrapper locked-field" id="dept-field" style="margin-bottom:0;">
+            <div class="input-wrapper" style="margin-bottom:0;">
               <label class="input-label" id="dept-label">Department</label>
               <div class="custom-dropdown" id="dept-dropdown" aria-labelledby="dept-label">
                 <button type="button" class="custom-dropdown-trigger disabled" id="dept-trigger"
@@ -83,8 +80,7 @@ export function renderNewSop(container) {
                         data-dept='${JSON.stringify(d)}' tabindex="0">
                         ${escapeHtml(d.name)}
                         <span style="display:none;color:var(--color-primary);">${icons.check.replace('width="20"','width="14"').replace('height="20"','height="14"')}</span>
-                      </div>
-                    `).join('')}
+                      </div>`).join('')}
                   </div>
                 </div>
               </div>
@@ -111,9 +107,7 @@ export function renderNewSop(container) {
             <input type="search" class="input-field" id="unit-search" placeholder="Search units..." aria-label="Search units" />
           </div>
         </div>
-        <div class="units-grid" id="units-grid">
-          ${renderUnitsGrid()}
-        </div>
+        <div class="units-grid" id="units-grid">${renderUnitsGrid()}</div>
         <div class="wizard-nav">
           <button class="btn btn-ghost" id="step2-back" type="button">
             ${icons['arrow-left'].replace('width="20"','width="16"').replace('height="20"','height="16"')} Back
@@ -141,23 +135,21 @@ export function renderNewSop(container) {
       </div>
     </div>
 
-    <!-- Step 4: Submit & Route -->
+    <!-- Step 4: Review & Submit -->
     <div class="wizard-pane" data-pane="4">
       <div class="wizard-card">
         <h1 class="wizard-card-title">Review &amp; Submit</h1>
 
-        <!-- SOP Summary -->
         <div class="submit-summary-card" id="summary-card"></div>
 
-        <!-- Approval Chain -->
+        <!-- Approval Chain (manual) -->
         <div id="approval-chain-container"></div>
 
-        <!-- Declaration -->
         <div class="card card-padded" style="margin-bottom:var(--space-6);">
           <label class="checkbox-wrap">
-            <input type="checkbox" class="checkbox-input" id="declaration-check" aria-describedby="declaration-text" />
-            <span class="checkbox-label" id="declaration-text">
-              I confirm this SOP is accurate and complete, and is ready for review by the assigned approvers.
+            <input type="checkbox" class="checkbox-input" id="declaration-check" />
+            <span class="checkbox-label">
+              I confirm this SOP is accurate and complete, and is ready for review.
             </span>
           </label>
         </div>
@@ -170,7 +162,7 @@ export function renderNewSop(container) {
             <button class="btn btn-outline" id="step4-draft" type="button">Save Draft</button>
             <button class="btn btn-danger btn-lg" id="submit-btn" disabled aria-disabled="true" type="button">
               ${icons.send.replace('width="20"','width="16"').replace('height="20"','height="16"')}
-              Submit for Approval
+              Submit SOP
             </button>
           </div>
         </div>
@@ -178,37 +170,28 @@ export function renderNewSop(container) {
     </div>
   `;
 
-  // Render step indicator
-  const stepsCard = container.querySelector('#wizard-steps-card');
-  renderWizardSteps(stepsCard, 1);
-
-  // Init step 1
+  renderWizardSteps(container.querySelector('#wizard-steps-card'), 1);
   initStep1(container);
   initStep2(container);
   initStep3(container);
   initStep4(container);
 }
 
-// ── Step 1 ──
+// ── Step 1 ──────────────────────────────────────────────────────
 function initStep1(container) {
-  const refineryDd = container.querySelector('#refinery-dropdown');
+  const refineryDd      = container.querySelector('#refinery-dropdown');
   const refineryTrigger = container.querySelector('#refinery-trigger');
-  const refinerySearch = container.querySelector('#refinery-search');
-  const refineryDisplay = container.querySelector('#refinery-display');
+  const refinerySearch  = container.querySelector('#refinery-search');
+  const deptDd          = container.querySelector('#dept-dropdown');
+  const deptTrigger     = container.querySelector('#dept-trigger');
+  const nextBtn         = container.querySelector('#step1-next');
 
-  const deptDd = container.querySelector('#dept-dropdown');
-  const deptTrigger = container.querySelector('#dept-trigger');
-  const deptDisplay = container.querySelector('#dept-display');
-
-  const nextBtn = container.querySelector('#step1-next');
-
-  // Refinery dropdown
   refineryTrigger.addEventListener('click', () => {
     refineryDd.classList.toggle('open');
     refineryTrigger.setAttribute('aria-expanded', refineryDd.classList.contains('open'));
   });
 
-  refinerySearch?.addEventListener('input', (e) => {
+  refinerySearch?.addEventListener('input', e => {
     const q = e.target.value.toLowerCase();
     container.querySelectorAll('#refinery-list [data-refinery]').forEach(opt => {
       const r = JSON.parse(opt.dataset.refinery);
@@ -218,10 +201,9 @@ function initStep1(container) {
 
   container.querySelectorAll('#refinery-list [data-refinery]').forEach(opt => {
     opt.addEventListener('click', () => selectRefinery(opt, container));
-    opt.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') selectRefinery(opt, container); });
+    opt.addEventListener('keydown', e => { if (e.key==='Enter'||e.key===' ') selectRefinery(opt, container); });
   });
 
-  // Department dropdown
   deptTrigger.addEventListener('click', () => {
     if (deptTrigger.disabled) return;
     deptDd.classList.toggle('open');
@@ -230,11 +212,10 @@ function initStep1(container) {
 
   container.querySelectorAll('#dept-list [data-dept]').forEach(opt => {
     opt.addEventListener('click', () => selectDept(opt, container));
-    opt.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') selectDept(opt, container); });
+    opt.addEventListener('keydown', e => { if (e.key==='Enter'||e.key===' ') selectDept(opt, container); });
   });
 
-  // Close dropdowns on outside click
-  document.addEventListener('click', (e) => {
+  document.addEventListener('click', e => {
     if (!refineryDd.contains(e.target)) { refineryDd.classList.remove('open'); refineryTrigger.setAttribute('aria-expanded','false'); }
     if (!deptDd.contains(e.target)) { deptDd.classList.remove('open'); deptTrigger.setAttribute('aria-expanded','false'); }
   });
@@ -251,17 +232,16 @@ function selectRefinery(opt, container) {
   container.querySelector('#refinery-display').textContent = r.name;
   container.querySelector('#refinery-dropdown').classList.remove('open');
   container.querySelectorAll('#refinery-list [data-refinery]').forEach(o => {
-    const isSelected = JSON.parse(o.dataset.refinery).code === r.code;
-    o.classList.toggle('selected', isSelected);
-    o.setAttribute('aria-selected', isSelected);
-    o.querySelector('span').style.display = isSelected ? '' : 'none';
+    const sel = JSON.parse(o.dataset.refinery).code === r.code;
+    o.classList.toggle('selected', sel);
+    o.setAttribute('aria-selected', sel);
+    o.querySelector('span').style.display = sel ? '' : 'none';
   });
-  // Enable department
   const deptTrigger = container.querySelector('#dept-trigger');
   deptTrigger.disabled = false;
   deptTrigger.removeAttribute('aria-disabled');
   deptTrigger.classList.remove('disabled');
-  container.querySelector('#dept-display').innerHTML = 'Select department...';
+  container.querySelector('#dept-display').textContent = 'Select department...';
   AppState.sopDraft.department = null;
   checkStep1Next(container);
 }
@@ -272,53 +252,44 @@ function selectDept(opt, container) {
   container.querySelector('#dept-display').textContent = d.name;
   container.querySelector('#dept-dropdown').classList.remove('open');
   container.querySelectorAll('#dept-list [data-dept]').forEach(o => {
-    const isSelected = JSON.parse(o.dataset.dept).code === d.code;
-    o.classList.toggle('selected', isSelected);
-    o.setAttribute('aria-selected', isSelected);
-    o.querySelector('span').style.display = isSelected ? '' : 'none';
+    const sel = JSON.parse(o.dataset.dept).code === d.code;
+    o.classList.toggle('selected', sel);
+    o.setAttribute('aria-selected', sel);
+    o.querySelector('span').style.display = sel ? '' : 'none';
   });
   checkStep1Next(container);
 }
 
 function checkStep1Next(container) {
-  const nextBtn = container.querySelector('#step1-next');
-  const enabled = !!(AppState.sopDraft.refinery && AppState.sopDraft.department);
-  nextBtn.disabled = !enabled;
-  nextBtn.setAttribute('aria-disabled', !enabled);
+  const btn = container.querySelector('#step1-next');
+  const ok  = !!(AppState.sopDraft.refinery && AppState.sopDraft.department);
+  btn.disabled = !ok;
+  btn.setAttribute('aria-disabled', !ok);
 }
 
-// ── Step 2 ──
+// ── Step 2 ──────────────────────────────────────────────────────
 function initStep2(container) {
-  const searchInput = container.querySelector('#unit-search');
-  const nextBtn = container.querySelector('#step2-next');
-  const backBtn = container.querySelector('#step2-back');
+  container.querySelector('#step2-back')?.addEventListener('click', () => showWizardStep(1));
 
-  backBtn.addEventListener('click', () => showWizardStep(1));
-  nextBtn.addEventListener('click', () => {
+  container.querySelector('#step2-next')?.addEventListener('click', () => {
     if (!AppState.sopDraft.unit) return;
-    // Generate SOP number before entering step 3
     AppState.sopDraft.sop_number = AppState.generateSOPNumber();
     renderSopBuilder(container.querySelector('#sop-builder-container'));
-    // Sync SOP number field
-    const numField = container.querySelector('#sop-number');
-    if (numField) numField.value = AppState.sopDraft.sop_number;
     showWizardStep(3);
   });
 
-  searchInput?.addEventListener('input', (e) => {
+  container.querySelector('#unit-search')?.addEventListener('input', e => {
     const q = e.target.value.toLowerCase();
     container.querySelectorAll('.unit-card').forEach(card => {
-      const name = (card.dataset.unitName || '').toLowerCase();
-      const desc = (card.dataset.unitDesc || '').toLowerCase();
-      card.style.display = (name.includes(q) || desc.includes(q)) ? '' : 'none';
+      const match = (card.dataset.unitName||'').includes(q) || (card.dataset.unitDesc||'').includes(q);
+      card.style.display = match ? '' : 'none';
     });
   });
 
   container.querySelectorAll('.unit-card').forEach(card => {
     card.addEventListener('click', () => selectUnit(card, container));
-    card.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') selectUnit(card, container); });
-    const selectBtn = card.querySelector('[data-select-unit]');
-    selectBtn?.addEventListener('click', (e) => { e.stopPropagation(); selectUnit(card, container); });
+    card.addEventListener('keydown', e => { if (e.key==='Enter'||e.key===' ') selectUnit(card, container); });
+    card.querySelector('[data-select-unit]')?.addEventListener('click', e => { e.stopPropagation(); selectUnit(card, container); });
   });
 }
 
@@ -329,7 +300,7 @@ function renderUnitsGrid() {
       data-unit='${JSON.stringify(u)}'
       data-unit-name="${escapeHtml(u.full.toLowerCase())} ${escapeHtml(u.name.toLowerCase())}"
       data-unit-desc="${escapeHtml(u.desc.toLowerCase())}"
-      aria-label="Select ${escapeHtml(u.full)} unit">
+      aria-label="Select ${escapeHtml(u.full)}">
       <div class="unit-card-check" aria-hidden="true">
         ${icons.check.replace('width="20"','width="12"').replace('height="20"','height="12"').replace('stroke-width="1.75"','stroke-width="3"')}
       </div>
@@ -338,66 +309,53 @@ function renderUnitsGrid() {
       </div>
       <div class="unit-name">${escapeHtml(u.name)} <span style="font-weight:400;font-size:12px;color:var(--color-text-secondary);">${escapeHtml(u.full)}</span></div>
       <div class="unit-desc">${escapeHtml(u.desc)}</div>
-      <button class="btn btn-outline btn-sm unit-select-btn" data-select-unit="${escapeHtml(u.code)}" type="button">
-        Select
-      </button>
-    </div>
-  `).join('');
+      <button class="btn btn-outline btn-sm unit-select-btn" data-select-unit="${escapeHtml(u.code)}" type="button">Select</button>
+    </div>`).join('');
 }
 
 function selectUnit(card, container) {
   const unit = JSON.parse(card.dataset.unit);
   AppState.sopDraft.unit = unit;
-
   container.querySelectorAll('.unit-card').forEach(c => {
-    const isSelected = c.dataset.unitCode === unit.code;
-    c.classList.toggle('selected', isSelected);
-    c.setAttribute('aria-checked', isSelected);
+    const sel = c.dataset.unitCode === unit.code;
+    c.classList.toggle('selected', sel);
+    c.setAttribute('aria-checked', sel);
     const btn = c.querySelector('[data-select-unit]');
     if (btn) {
-      if (isSelected) {
-        btn.textContent = '';
-        btn.innerHTML = `${icons.check.replace('width="20"','width="12"').replace('height="20"','height="12"').replace('stroke-width="1.75"','stroke-width="3"')} Selected`;
-        btn.classList.add('btn-primary');
-        btn.classList.remove('btn-outline');
-      } else {
-        btn.textContent = 'Select';
-        btn.classList.remove('btn-primary');
-        btn.classList.add('btn-outline');
-      }
+      btn.innerHTML = sel
+        ? `${icons.check.replace('width="20"','width="12"').replace('height="20"','height="12"').replace('stroke-width="1.75"','stroke-width="3"')} Selected`
+        : 'Select';
+      btn.classList.toggle('btn-primary', sel);
+      btn.classList.toggle('btn-outline', !sel);
     }
   });
-
-  const nextBtn = container.querySelector('#step2-next');
-  nextBtn.disabled = false;
-  nextBtn.removeAttribute('aria-disabled');
+  const next = container.querySelector('#step2-next');
+  next.disabled = false;
+  next.removeAttribute('aria-disabled');
 }
 
-// ── Step 3 ──
+// ── Step 3 ──────────────────────────────────────────────────────
 function initStep3(container) {
   container.querySelector('#step3-back')?.addEventListener('click', () => showWizardStep(2));
+  container.querySelector('#step3-draft')?.addEventListener('click', saveDraft);
   container.querySelector('#step3-next')?.addEventListener('click', () => {
-    const titleInput = container.querySelector('#sop-title');
     if (!AppState.sopDraft.title.trim()) {
-      titleInput?.focus();
-      titleInput?.classList.add('input-error');
+      container.querySelector('#sop-title')?.focus();
       toast.error('Please enter an SOP title before continuing.');
       return;
     }
-    // Populate summary and chain for step 4
     renderSummaryCard(container.querySelector('#summary-card'));
     renderApprovalChain(container.querySelector('#approval-chain-container'));
     showWizardStep(4);
   });
-  container.querySelector('#step3-draft')?.addEventListener('click', saveDraft);
 }
 
-// ── Step 4 ──
+// ── Step 4 ──────────────────────────────────────────────────────
 function initStep4(container) {
   container.querySelector('#step4-back')?.addEventListener('click', () => showWizardStep(3));
   container.querySelector('#step4-draft')?.addEventListener('click', saveDraft);
 
-  const submitBtn = container.querySelector('#submit-btn');
+  const submitBtn   = container.querySelector('#submit-btn');
   const declaration = container.querySelector('#declaration-check');
 
   declaration?.addEventListener('change', () => {
@@ -409,20 +367,12 @@ function initStep4(container) {
     submitBtn.innerHTML = `<span class="btn-spinner" aria-hidden="true"></span> Submitting…`;
     submitBtn.disabled = true;
     try {
-      // 1. Create SOP in DB
-      const created = await api.createSOP({
-        ...AppState.sopDraft,
-        status: 'draft',
-      });
-      // 2. Submit for approval
-      if (created?.id) {
-        await api.submitSOP(created.id);
-      }
-      toast.success('SOP submitted for approval!', AppState.sopDraft.sop_number);
-      setTimeout(() => navigate('#dashboard'), 1500);
+      const created = await api.createSOP({ ...AppState.sopDraft, status: 'review' });
+      toast.success('SOP submitted!', AppState.sopDraft.sop_number);
+      setTimeout(() => navigate('#my-sops'), 1500);
     } catch (e) {
       toast.error('Submission failed', e.message);
-      submitBtn.innerHTML = `${icons.send.replace('width="20"','width="16"').replace('height="20"','height="16"')} Submit for Approval`;
+      submitBtn.innerHTML = `${icons.send.replace('width="20"','width="16"').replace('height="20"','height="16"')} Submit SOP`;
       submitBtn.disabled = false;
     }
   });
@@ -430,10 +380,10 @@ function initStep4(container) {
 
 function renderSummaryCard(el) {
   if (!el) return;
-  const d = AppState.sopDraft;
+  const d     = AppState.sopDraft;
   const total = AppState.getTotalScore();
-  const max = AppState.getMaxScore();
-  const pct = max > 0 ? Math.round((total / max) * 100) : 0;
+  const max   = AppState.getMaxScore();
+  const pct   = max > 0 ? Math.round((total / max) * 100) : 0;
 
   el.innerHTML = `
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-4);">
@@ -451,15 +401,15 @@ function renderSummaryCard(el) {
       </div>
       <div class="summary-item">
         <div class="summary-item-label">Refinery</div>
-        <div class="summary-item-value">${escapeHtml(d.refinery?.name || '—')}</div>
+        <div class="summary-item-value">${escapeHtml(d.refinery?.name||'—')}</div>
       </div>
       <div class="summary-item">
         <div class="summary-item-label">Department</div>
-        <div class="summary-item-value">${escapeHtml(d.department?.name || '—')}</div>
+        <div class="summary-item-value">${escapeHtml(d.department?.name||'—')}</div>
       </div>
       <div class="summary-item">
         <div class="summary-item-label">Unit</div>
-        <div class="summary-item-value">${escapeHtml(d.unit?.name || '—')}</div>
+        <div class="summary-item-value">${escapeHtml(d.unit?.name||'—')}</div>
       </div>
       <div class="summary-item">
         <div class="summary-item-label">Sections / Components</div>
@@ -479,15 +429,15 @@ function renderSummaryCard(el) {
 async function saveDraft() {
   try {
     await api.createSOP({ ...AppState.sopDraft, status: 'draft' });
-    toast.success('Draft saved successfully');
+    toast.success('Draft saved');
   } catch (e) {
-    toast.error('Failed to save draft', e.message);
+    toast.error('Save failed', e.message);
   }
 }
 
 function escapeHtml(str) {
   if (!str) return '';
-  const div = document.createElement('div');
-  div.textContent = String(str);
-  return div.innerHTML;
+  const d = document.createElement('div');
+  d.textContent = String(str);
+  return d.innerHTML;
 }

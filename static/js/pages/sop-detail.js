@@ -70,10 +70,10 @@ export async function renderSopDetail(container, sopId) {
 
     <!-- Tab Bar -->
     <div class="tab-bar card" role="tablist" style="border-radius:var(--radius-md) var(--radius-md) 0 0;margin-bottom:0;">
-      <button class="tab-item active" data-tab="overview"    role="tab" aria-selected="true"  tabindex="0">Overview</button>
-      <button class="tab-item"        data-tab="sections"    role="tab" aria-selected="false" tabindex="-1">Sections &amp; Content</button>
-      <button class="tab-item"        data-tab="approval"    role="tab" aria-selected="false" tabindex="-1">Approval Status</button>
-      <button class="tab-item"        data-tab="history"     role="tab" aria-selected="false" tabindex="-1">Revision History</button>
+      <button class="tab-item active" data-tab="overview" role="tab" aria-selected="true"  tabindex="0">Overview</button>
+      <button class="tab-item"        data-tab="sections" role="tab" aria-selected="false" tabindex="-1">Sections &amp; Content</button>
+      <button class="tab-item"        data-tab="approval" role="tab" aria-selected="false" tabindex="-1">Approval Status</button>
+      <button class="tab-item"        data-tab="history"  role="tab" aria-selected="false" tabindex="-1">Revision History</button>
     </div>
 
     <!-- Tab Panels -->
@@ -191,33 +191,33 @@ export async function renderSopDetail(container, sopId) {
       <!-- Approval Status Tab -->
       <div class="tab-pane" data-panel="approval" role="tabpanel">
         <div style="padding:var(--space-6);">
-          <div class="timeline" aria-label="Approval timeline">
-            ${sop.approval_chain.map((step, i) => `
-              <div class="timeline-item">
-                <div class="timeline-dot ${step.status}" aria-label="${step.status}" role="img">
-                  ${step.status === 'approved' ? icons.check.replace('width="20"','width="14"').replace('height="20"','height="14"').replace('stroke-width="1.75"','stroke-width="3"') :
-                    step.status === 'rejected' ? icons.x.replace('width="20"','width="14"').replace('height="20"','height="14"') :
-                    icons.clock.replace('width="20"','width="14"').replace('height="20"','height="14"')}
+          ${sop.approval_chain?.length ? `
+            <div class="timeline" aria-label="Approval timeline">
+              ${sop.approval_chain.map(step => `
+                <div class="timeline-item">
+                  <div class="timeline-dot ${step.status}" aria-label="${step.status}" role="img">
+                    ${step.status === 'approved'
+                      ? icons.check.replace('width="20"','width="14"').replace('height="20"','height="14"').replace('stroke-width="1.75"','stroke-width="3"')
+                      : step.status === 'rejected'
+                        ? icons.x.replace('width="20"','width="14"').replace('height="20"','height="14"')
+                        : icons.clock.replace('width="20"','width="14"').replace('height="20"','height="14"')}
+                  </div>
+                  <div class="timeline-content">
+                    <div class="timeline-role">${escapeHtml(step.role)}</div>
+                    <div class="timeline-user">${escapeHtml(step.user)}</div>
+                    <div class="timeline-timestamp">${step.timestamp ? new Date(step.timestamp).toLocaleString('en-IN') : 'Pending'}</div>
+                    ${step.comment ? `<div class="timeline-comment">${escapeHtml(step.comment)}</div>` : ''}
+                  </div>
                 </div>
-                <div class="timeline-content">
-                  <div class="timeline-role">${escapeHtml(step.role)}</div>
-                  <div class="timeline-user">${escapeHtml(step.user)}</div>
-                  ${step.timestamp ? `<div class="timeline-timestamp">${new Date(step.timestamp).toLocaleString('en-IN')}</div>` : '<div class="timeline-timestamp">Pending</div>'}
-                  ${step.comment ? `<div class="timeline-comment">${escapeHtml(step.comment)}</div>` : ''}
-                  ${step.status === 'pending' && i === sop.approval_chain.findIndex(s => s.status === 'pending') ? `
-                    <div class="approval-actions-row">
-                      <button class="btn btn-primary btn-sm" id="approve-btn-${i}" aria-label="Approve this step" type="button">
-                        ${icons.check.replace('width="20"','width="14"').replace('height="20"','height="14"')} Approve
-                      </button>
-                      <button class="btn btn-danger btn-sm" id="reject-btn-${i}" aria-label="Reject this step" type="button">
-                        ${icons.x.replace('width="20"','width="14"').replace('height="20"','height="14"')} Reject
-                      </button>
-                    </div>
-                  ` : ''}
-                </div>
-              </div>
-            `).join('')}
-          </div>
+              `).join('')}
+            </div>
+          ` : `
+            <div class="empty-state" style="padding:40px;">
+              <div class="empty-state-icon">${icons.clock.replace('width="20"','width="40"').replace('height="20"','height="40"')}</div>
+              <div class="empty-state-title">No approval chain assigned</div>
+              <div class="empty-state-text">Approvers will appear here once the SOP is submitted.</div>
+            </div>
+          `}
         </div>
       </div>
 
@@ -251,30 +251,6 @@ export async function renderSopDetail(container, sopId) {
         </div>
       </div>
     </div>
-
-    <!-- Reject Modal -->
-    <div class="modal-overlay" id="reject-modal" role="dialog" aria-modal="true" aria-labelledby="reject-modal-title">
-      <div class="modal-panel">
-        <div class="modal-header">
-          <h2 class="modal-title" id="reject-modal-title">Reject SOP</h2>
-          <button class="modal-close" id="modal-close-btn" aria-label="Close modal" type="button">
-            ${icons.x.replace('width="20"','width="16"').replace('height="20"','height="16"')}
-          </button>
-        </div>
-        <div class="input-wrapper">
-          <label class="input-label" for="reject-comment">Rejection Reason (required)</label>
-          <textarea id="reject-comment" class="input-field" rows="4"
-            placeholder="Provide a clear reason for rejection..."
-            aria-required="true"></textarea>
-        </div>
-        <div class="modal-footer">
-          <button class="btn btn-ghost" id="modal-cancel-btn" type="button">Cancel</button>
-          <button class="btn btn-danger" id="modal-confirm-reject" type="button">
-            Confirm Rejection
-          </button>
-        </div>
-      </div>
-    </div>
   `;
 
   // Tab switching
@@ -302,7 +278,9 @@ export async function renderSopDetail(container, sopId) {
   // Download PDF
   container.querySelector('#download-btn')?.addEventListener('click', () => {
     const a = document.createElement('a');
-    a.href = api.getSOPPdfUrl(sopId); a.download = `${sop.sop_number||'sop'}.pdf`; a.target='_blank';
+    a.href = api.getSOPPdfUrl(sopId);
+    a.download = `${sop.sop_number||'sop'}.pdf`;
+    a.target = '_blank';
     document.body.appendChild(a); a.click(); a.remove();
     toast.info('Downloading PDF…', sop.sop_number);
   });
@@ -310,56 +288,11 @@ export async function renderSopDetail(container, sopId) {
   // Download DOCX
   container.querySelector('#download-docx-btn')?.addEventListener('click', () => {
     const a = document.createElement('a');
-    a.href = api.getSOPDocxUrl(sopId); a.download = `${sop.sop_number||'sop'}.docx`; a.target='_blank';
+    a.href = api.getSOPDocxUrl(sopId);
+    a.download = `${sop.sop_number||'sop'}.docx`;
+    a.target = '_blank';
     document.body.appendChild(a); a.click(); a.remove();
     toast.info('Downloading DOCX…', sop.sop_number);
-  });
-
-  // Approve/Reject buttons
-  container.querySelectorAll('[id^="approve-btn-"]').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      btn.innerHTML = '<span class="btn-spinner"></span>';
-      btn.disabled = true;
-      try {
-        await api.approveSOP(sopId);
-        toast.success('SOP approved!');
-        setTimeout(() => renderSopDetail(container, sopId), 1000);
-      } catch(e) {
-        toast.error('Approval failed', e.message);
-        btn.textContent = 'Approve';
-        btn.disabled = false;
-      }
-    });
-  });
-
-  container.querySelectorAll('[id^="reject-btn-"]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      container.querySelector('#reject-modal').classList.add('open');
-      container.querySelector('#reject-comment')?.focus();
-    });
-  });
-
-  const modal = container.querySelector('#reject-modal');
-  const closeModal = () => modal.classList.remove('open');
-  container.querySelector('#modal-close-btn')?.addEventListener('click', closeModal);
-  container.querySelector('#modal-cancel-btn')?.addEventListener('click', closeModal);
-  modal?.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
-
-  container.querySelector('#modal-confirm-reject')?.addEventListener('click', async () => {
-    const comment = container.querySelector('#reject-comment')?.value?.trim();
-    if (!comment) {
-      container.querySelector('#reject-comment')?.classList.add('input-error');
-      container.querySelector('#reject-comment')?.focus();
-      return;
-    }
-    try {
-      await api.rejectSOP(sopId, comment);
-      toast.warning('SOP has been rejected.');
-      closeModal();
-      setTimeout(() => renderSopDetail(container, sopId), 1000);
-    } catch(e) {
-      toast.error('Rejection failed', e.message);
-    }
   });
 
   // Open first section in accordion
