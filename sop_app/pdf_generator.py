@@ -135,13 +135,28 @@ def generate_sop_pdf(sop) -> bytes:
                 text = comp.content
                 text = text.replace('<p>', '').replace('</p>', '<br/>')
                 text = text.replace('<br>', '<br/>').replace('\n', '<br/>')
-                # Bold/italic pass-through supported by Paragraph
                 try:
                     story.append(Paragraph(text, style_body))
                 except Exception:
                     clean = re.sub(r'<[^>]+>', ' ', text)
                     story.append(Paragraph(clean, style_body))
                 story.append(Spacer(1, 0.2*cm))
+
+            elif comp.type == 'step':
+                # Numbered steps stored as JSON list OR newline-separated
+                import json as _json
+                steps = []
+                try:
+                    steps = _json.loads(comp.content) if comp.content.startswith('[') else comp.content.split('\n')
+                except Exception:
+                    steps = comp.content.split('\n') if comp.content else []
+                for idx, step_text in enumerate(steps):
+                    step_text = step_text.strip()
+                    if step_text:
+                        step_para = Paragraph(f'<b>{idx+1}.</b>  {step_text}', style_body)
+                        story.append(step_para)
+                        story.append(Spacer(1, 0.1*cm))
+                story.append(Spacer(1, 0.15*cm))
 
             elif comp.type == 'table' and comp.table_rows:
                 rows = comp.table_rows

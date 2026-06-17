@@ -54,7 +54,10 @@ export async function renderSopDetail(container, sopId) {
         <div class="sop-detail-actions">
           ${renderStatusPill(sop.status, true)}
           <button class="btn btn-outline" id="download-btn" aria-label="Download PDF">
-            ${icons.download.replace('width="20"','width="16"').replace('height="20"','height="16"')} Download PDF
+            ${icons.download.replace('width="20"','width="16"').replace('height="20"','height="16"')} PDF
+          </button>
+          <button class="btn btn-outline" id="download-docx-btn" aria-label="Download DOCX">
+            ${icons.download.replace('width="20"','width="16"').replace('height="20"','height="16"')} DOCX
           </button>
           ${canEdit ? `
             <button class="btn btn-primary" id="edit-btn" aria-label="Edit SOP">
@@ -296,17 +299,20 @@ export async function renderSopDetail(container, sopId) {
   // Edit button
   container.querySelector('#edit-btn')?.addEventListener('click', () => navigate('#new-sop'));
 
-  // Download PDF — real backend endpoint
+  // Download PDF
   container.querySelector('#download-btn')?.addEventListener('click', () => {
-    const url = api.getSOPPdfUrl(sopId);
     const a = document.createElement('a');
-    a.href = url;
-    a.download = `${sop.sop_number || 'sop'}.pdf`;
-    a.target = '_blank';
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
+    a.href = api.getSOPPdfUrl(sopId); a.download = `${sop.sop_number||'sop'}.pdf`; a.target='_blank';
+    document.body.appendChild(a); a.click(); a.remove();
     toast.info('Downloading PDF…', sop.sop_number);
+  });
+
+  // Download DOCX
+  container.querySelector('#download-docx-btn')?.addEventListener('click', () => {
+    const a = document.createElement('a');
+    a.href = api.getSOPDocxUrl(sopId); a.download = `${sop.sop_number||'sop'}.docx`; a.target='_blank';
+    document.body.appendChild(a); a.click(); a.remove();
+    toast.info('Downloading DOCX…', sop.sop_number);
   });
 
   // Approve/Reject buttons
@@ -368,11 +374,23 @@ function renderComponentView(comp) {
   switch(comp.type) {
     case 'text':
       return `<div class="detail-component-text">${comp.content || '<em style="color:var(--color-text-secondary)">No content</em>'}</div>`;
+
+    case 'step': {
+      let steps = [];
+      try { steps = comp.steps || JSON.parse(comp.content || '[]'); }
+      catch { steps = (comp.content||'').split('\n').filter(Boolean); }
+      if (!steps.length) return '<em style="color:var(--color-text-secondary)">No steps</em>';
+      return `<ol style="padding-left:24px;margin:0;display:flex;flex-direction:column;gap:6px;">
+        ${steps.map(s => `<li style="font-size:14px;line-height:1.6;color:var(--color-text-primary);">${escapeHtml(s)}</li>`).join('')}
+      </ol>`;
+    }
+
     case 'chart':
     case 'image':
       return comp.src
         ? `<img src="${escapeHtml(comp.src)}" class="detail-component-img" alt="${escapeHtml(comp.altText||comp.chartTitle||'')}" />${comp.caption||comp.chartDesc ? `<p class="component-caption">${escapeHtml(comp.caption||comp.chartDesc)}</p>` : ''}`
         : `<div style="background:var(--color-bg);border-radius:var(--radius-sm);padding:32px;text-align:center;color:var(--color-text-secondary);">${icons.image.replace('width="20"','width="32"').replace('height="20"','height="32"')}<br/>No image uploaded</div>`;
+
     case 'table':
       if (!comp.rows || comp.rows.length === 0) return '<em style="color:var(--color-text-secondary)">No table data</em>';
       return `

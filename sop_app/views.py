@@ -17,6 +17,7 @@ from .serializers import (
 )
 from .document_parser import parse_document
 from .pdf_generator import generate_sop_pdf
+from .docx_generator import generate_sop_docx
 
 logger = logging.getLogger(__name__)
 
@@ -162,14 +163,20 @@ class SOPListCreateView(View):
 
 
 def _fill_component(comp, data):
+    import json as _json
     comp.type = data.get('type', 'text')
     comp.weight = int(data.get('weight', 0) or 0)
-    comp.content = data.get('content', '')
-    comp.image_url = data.get('src', '') or ''
-    comp.alt_text = data.get('altText', '') or ''
-    comp.caption = data.get('caption', '') or ''
+    # For 'step' type, store steps list as JSON in content field
+    if comp.type == 'step':
+        steps = data.get('steps', [])
+        comp.content = _json.dumps([s for s in steps if s and s.strip()])
+    else:
+        comp.content = data.get('content', '')
+    comp.image_url  = data.get('src', '') or ''
+    comp.alt_text   = data.get('altText', '') or ''
+    comp.caption    = data.get('caption', '') or ''
     comp.chart_title = data.get('chartTitle', '') or ''
-    comp.chart_desc = data.get('chartDesc', '') or ''
+    comp.chart_desc  = data.get('chartDesc', '') or ''
     if data.get('rows'):
         comp.table_rows = data['rows']
 
@@ -322,6 +329,29 @@ class SOPRejectView(View):
             )
 
         return json_response({'success': True, 'status': sop.status})
+
+
+class SOPDocxView(View):
+    def get(self, request, pk):
+        sop = get_object_or_404(
+            SOP.objects.select_related('refinery', 'department', 'unit', 'prepared_by')
+                       .prefetch_related('sections__components', 'approval_chain__approver'),
+            pk=pk
+        )
+        try:
+            docx_bytes = generate_sop_docx(sop)
+            if not docx_bytes:
+                return error_response('DOCX generation failed', 500)
+            response = HttpResponse(
+                docx_bytes,
+                content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+            )
+            safe_name = sop.sop_number.replace('/', '-') if sop.sop_number else f'sop-{pk}'
+            response['Content-Disposition'] = f'attachment; filename="{safe_name}.docx"'
+            return response
+        except Exception as e:
+            logger.error(f'DOCX generation error: {e}')
+            return error_response(str(e), 500)
 
 
 # ── PDF Download ──────────────────────────────────────────────────

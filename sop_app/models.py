@@ -97,6 +97,7 @@ class SOPSection(models.Model):
 class SOPComponent(models.Model):
     TYPE_CHOICES = [
         ('text',  'Text'),
+        ('step',  'Numbered Steps'),
         ('chart', 'Chart'),
         ('image', 'Image'),
         ('table', 'Table'),

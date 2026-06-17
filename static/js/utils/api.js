@@ -89,10 +89,9 @@ export const api = {
     });
   },
 
-  // PDF download — returns a URL to open
-  getSOPPdfUrl(id) {
-    return `${API_BASE}/sops/${id}/pdf/`;
-  },
+  // PDF/DOCX download — returns a URL to open directly
+  getSOPPdfUrl(id)  { return `${API_BASE}/sops/${id}/pdf/`; },
+  getSOPDocxUrl(id) { return `${API_BASE}/sops/${id}/docx/`; },
 
   // Parse uploaded PDF/DOCX → sections JSON
   async parseDocument(file) {

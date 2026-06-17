@@ -16,12 +16,21 @@ def serialize_user(user):
 
 
 def serialize_component(comp):
+    import json as _json
+    steps = None
+    if comp.type == 'step':
+        try:
+            steps = _json.loads(comp.content) if comp.content else []
+        except Exception:
+            steps = comp.content.split('\n') if comp.content else []
+
     return {
         'id': comp.id,
         'type': comp.type,
         'order': comp.order,
         'weight': comp.weight,
         'content': comp.content,
+        'steps': steps,
         'src': comp.image_url or None,
         'altText': comp.alt_text,
         'caption': comp.caption,
