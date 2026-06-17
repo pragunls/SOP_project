@@ -153,4 +153,65 @@ class Command(BaseCommand):
                 }
             )
 
+        # ── Additional mock SOPs ──────────────────────────────────
+        ref_viz  = Refinery.objects.get(code='VIZ')
+        ref_mun  = Refinery.objects.get(code='MUN')
+        ref_bat  = Refinery.objects.get(code='BAT')
+        dept_mnt = Department.objects.get(code='MNT')
+        dept_pro = Department.objects.get(code='PRO')
+        dept_qc  = Department.objects.get(code='QC')
+        unit_fcc = ProcessUnit.objects.get(code='FCC')
+        unit_hcu = ProcessUnit.objects.get(code='HCU')
+        unit_vdu = ProcessUnit.objects.get(code='VDU')
+        unit_ccr = ProcessUnit.objects.get(code='CCR')
+        unit_aru = ProcessUnit.objects.get(code='ARU')
+        unit_sru = ProcessUnit.objects.get(code='SRU')
+
+        extra_sops = [
+            ('SOP-VIZ-OPS-FCC-2025-001', 'FCC Regenerator Temperature Control',
+             ref_viz, dept_ops, unit_fcc, users['venkat.rao'], 'draft', ['temperature','control']),
+            ('SOP-MUN-PRO-HCU-2025-001', 'Hydrocracker Feed Rate Optimization',
+             ref_mun, dept_pro, unit_hcu, users['arjun.patel'], 'rejected', ['optimization','feed']),
+            ('SOP-BAT-MNT-VDU-2025-001', 'Vacuum Distillation Column Maintenance Protocol',
+             ref_bat, dept_mnt, unit_vdu, users['gurpreet.singh'], 'approved', ['maintenance','vdu']),
+            ('SOP-MUM-OPS-CCR-2025-001', 'CCR Catalyst Regeneration Procedure',
+             ref_mum, dept_ops, unit_ccr, users['priya.sharma'], 'review', ['catalyst','ccr']),
+            ('SOP-VIZ-HSE-ARU-2025-002', 'Amine Recovery Unit H2S Monitoring',
+             ref_viz, dept_hse, unit_aru, users['venkat.rao'], 'approved', ['h2s','monitoring','aru']),
+            ('SOP-MUN-OPS-SRU-2025-001', 'Sulphur Recovery Unit Startup Checklist',
+             ref_mun, dept_ops, unit_sru, users['arjun.patel'], 'draft', ['startup','sulphur']),
+            ('SOP-BAT-QC-NHT-2025-001', 'NHT Feed Quality Specification Verification',
+             ref_bat, dept_qc, unit_nht, users['gurpreet.singh'], 'approved', ['quality','nht']),
+            ('SOP-MUM-PRO-CDU-2025-003', 'Crude Distillation Throughput Optimization',
+             ref_mum, dept_pro, unit_cdu, users['rajesh.kumar'], 'review', ['throughput','cdu']),
+        ]
+
+        for sop_num, title, refinery, dept, unit, user, status, tags in extra_sops:
+            if not SOP.objects.filter(sop_number=sop_num).exists():
+                sop = SOP.objects.create(
+                    sop_number=sop_num, title=title, version='1.0',
+                    status=status, refinery=refinery, department=dept,
+                    unit=unit, prepared_by=user,
+                )
+                sop.tags = tags
+                sop.save()
+
+                sec = SOPSection.objects.create(sop=sop, name='Procedure', order=0)
+                SOPComponent.objects.create(
+                    section=sec, type='text', order=0, weight=3,
+                    content=f'<p>Standard operating procedure for {title}.</p>'
+                )
+
+                if status == 'review':
+                    ApprovalStep.objects.create(
+                        sop=sop, step=1, role='Unit Supervisor',
+                        approver=users['gurpreet.singh'], status='pending'
+                    )
+                elif status == 'approved':
+                    ApprovalStep.objects.create(
+                        sop=sop, step=1, role='Unit Supervisor',
+                        approver=users['gurpreet.singh'], status='approved',
+                        comment='Approved.'
+                    )
+
         self.stdout.write(self.style.SUCCESS('✓ Seed data loaded successfully.'))

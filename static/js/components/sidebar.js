@@ -29,8 +29,11 @@ export function initSidebar() {
     sidebarEl.classList.toggle('collapsed');
     mainEl?.classList.toggle('sidebar-collapsed');
     const isCollapsed = sidebarEl.classList.contains('collapsed');
-    toggleBtn.innerHTML = isCollapsed ? icons.chevronRight : icons.chevronLeft;
+    const chevronRight = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>`;
+    const chevronLeft  = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>`;
+    toggleBtn.innerHTML = isCollapsed ? chevronRight : chevronLeft;
     toggleBtn.setAttribute('aria-label', isCollapsed ? 'Expand sidebar' : 'Collapse sidebar');
+    toggleBtn.setAttribute('title',      isCollapsed ? 'Expand sidebar' : 'Collapse sidebar');
   });
 
   // Mobile hamburger
