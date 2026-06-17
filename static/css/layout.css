@@ -151,12 +151,12 @@
 
 .sidebar-toggle {
   position: absolute;
-  top: 12px;
-  right: -12px;
-  width: 24px;
-  height: 24px;
-  background: var(--color-primary-dark);
-  border: 2px solid rgba(255,255,255,0.2);
+  top: 14px;
+  right: -16px;
+  width: 32px;
+  height: 32px;
+  background: var(--color-accent);
+  border: 3px solid #FFFFFF;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -164,11 +164,18 @@
   cursor: pointer;
   color: #FFFFFF;
   z-index: 10;
-  transition: background var(--transition-normal);
+  transition: background var(--transition-normal), transform var(--transition-normal);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
 }
 
 .sidebar-toggle:hover {
-  background: var(--color-accent);
+  background: var(--color-accent-hover);
+  transform: scale(1.12);
+}
+
+.sidebar-toggle svg {
+  width: 14px;
+  height: 14px;
 }
 
 .sidebar-nav {

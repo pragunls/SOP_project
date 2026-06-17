@@ -4,6 +4,8 @@
 
 import { AppState } from '../state.js';
 import { icons } from './icons.js';
+import { api } from '../utils/api.js';
+import { toast } from '../utils/toast.js';
 
 let dragSrcEl = null;
 
@@ -13,6 +15,26 @@ export function renderSopBuilder(container) {
     <div class="builder-layout">
       <!-- Left: Metadata + Section Manager -->
       <div class="builder-sidebar" id="builder-sidebar">
+
+        <!-- ── Document Upload Panel ── -->
+        <div class="doc-upload-panel" id="doc-upload-panel">
+          <div class="doc-upload-label">
+            ${icons['cloud-upload'].replace('width="20"','width="16"').replace('height="20"','height="16"')}
+            Import from PDF / DOCX
+          </div>
+          <div class="doc-drop-zone" id="doc-drop-zone" tabindex="0" role="button"
+            aria-label="Upload PDF or DOCX to auto-fill sections">
+            <span class="doc-drop-icon" aria-hidden="true">
+              ${icons['file-text'].replace('width="20"','width="28"').replace('height="20"','height="28"')}
+            </span>
+            <span class="doc-drop-text">Drop PDF or DOCX here<br/>or click to browse</span>
+            <span class="doc-drop-sub">Max 20 MB · PDF, DOCX</span>
+            <input type="file" id="doc-file-input" accept=".pdf,.docx,.doc"
+              style="display:none;" aria-hidden="true" />
+          </div>
+          <div class="doc-parse-status" id="doc-parse-status" style="display:none;"></div>
+        </div>
+        <div class="divider"></div>
         <div class="meta-form">
           <div class="input-wrapper">
             <label class="input-label" for="sop-title">SOP Title *</label>
@@ -431,6 +453,7 @@ function attachBuilderEvents(container) {
   });
 
   initDragToReorder(container);
+  initDocumentUpload(container);
 }
 
 // ── Component CRUD ──
@@ -676,4 +699,129 @@ function escapeHtml(str) {
   const div = document.createElement('div');
   div.textContent = String(str);
   return div.innerHTML;
+}
+
+// ── renderTag helper (used in template literal) ──
+function renderTag(tag) {
+  return `<span class="tag-chip">${escapeHtml(tag)}<button class="tag-chip-remove" type="button" aria-label="Remove tag">×</button></span>`;
+}
+
+// ── Document Upload & Auto-Parse ──
+function initDocumentUpload(container) {
+  const dropZone  = container.querySelector('#doc-drop-zone');
+  const fileInput = container.querySelector('#doc-file-input');
+  const status    = container.querySelector('#doc-parse-status');
+
+  if (!dropZone || !fileInput) return;
+
+  // Click to open picker
+  dropZone.addEventListener('click', () => fileInput.click());
+  dropZone.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') fileInput.click();
+  });
+
+  // Drag-over
+  dropZone.addEventListener('dragover',  (e) => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+  dropZone.addEventListener('dragleave', ()  => dropZone.classList.remove('drag-over'));
+  dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file) handleDocFile(file, container, status, dropZone);
+  });
+
+  fileInput.addEventListener('change', () => {
+    const file = fileInput.files[0];
+    if (file) handleDocFile(file, container, status, dropZone);
+  });
+}
+
+async function handleDocFile(file, container, statusEl, dropZone) {
+  const allowedExt = ['.pdf', '.docx', '.doc'];
+  const ext = '.' + file.name.split('.').pop().toLowerCase();
+  if (!allowedExt.includes(ext)) {
+    showParseStatus(statusEl, 'error', 'Only PDF and DOCX files are supported.');
+    return;
+  }
+
+  // Show loading state
+  dropZone.classList.add('parsing');
+  showParseStatus(statusEl, 'loading',
+    `${icons['cloud-upload'].replace('width="20"','width="14"').replace('height="20"','height="14"')} Parsing ${escapeHtml(file.name)}…`);
+
+  try {
+    const result = await api.parseDocument(file);
+    dropZone.classList.remove('parsing');
+
+    if (result.error) {
+      showParseStatus(statusEl, 'error', `Parse error: ${result.error}`);
+      return;
+    }
+
+    // Auto-fill title if empty
+    if (result.title && !AppState.sopDraft.title) {
+      AppState.sopDraft.title = result.title;
+      const titleInput = container.querySelector('#sop-title');
+      if (titleInput) titleInput.value = result.title;
+    }
+
+    // Inject extracted sections into draft and re-render builder
+    if (result.sections && result.sections.length) {
+      injectParsedSections(result.sections, container);
+    }
+
+    const { text_blocks = 0, tables = 0, images = 0 } = result.stats || {};
+    showParseStatus(statusEl, 'success',
+      `✓ Imported ${result.sections?.length || 0} sections · ${text_blocks} text · ${tables} tables · ${images} images`);
+
+    toast.success('Document imported', `${file.name} extracted successfully`);
+
+  } catch (err) {
+    dropZone.classList.remove('parsing');
+    showParseStatus(statusEl, 'error', `Failed: ${err.message}`);
+    toast.error('Document parse failed', err.message);
+  }
+}
+
+function injectParsedSections(parsedSections, container) {
+  // Replace existing sections with parsed ones
+  let idCounter = 200;
+  AppState.sopDraft.sections = parsedSections.map((sec, i) => {
+    idCounter++;
+    let compCounter2 = idCounter * 100;
+    return {
+      id: idCounter,
+      name: sec.name || `Section ${i + 1}`,
+      components: (sec.components || []).map(comp => {
+        compCounter2++;
+        return {
+          id: compCounter2,
+          type: comp.type || 'text',
+          content: comp.content || '',
+          weight: 0,
+          src: comp.src || null,
+          altText: comp.altText || '',
+          caption: comp.caption || '',
+          chartTitle: comp.chartTitle || '',
+          chartDesc: comp.chartDesc || '',
+          rows: comp.rows || (comp.type === 'table' ? [] : null),
+        };
+      }),
+    };
+  });
+
+  AppState.sopDraft.activeSectionId = AppState.sopDraft.sections[0]?.id;
+
+  // Re-render the builder inside the same container
+  const builderContainer = document.getElementById('sop-builder-container');
+  if (builderContainer) {
+    renderSopBuilder(builderContainer);
+  }
+}
+
+function showParseStatus(el, type, html) {
+  if (!el) return;
+  el.style.display = 'flex';
+  el.className = `doc-parse-status doc-parse-${type}`;
+  el.innerHTML = html;
 }

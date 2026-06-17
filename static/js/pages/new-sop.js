@@ -409,10 +409,18 @@ function initStep4(container) {
     submitBtn.innerHTML = `<span class="btn-spinner" aria-hidden="true"></span> Submitting…`;
     submitBtn.disabled = true;
     try {
-      await api.submitSOP(null, AppState.sopDraft.approvalChain);
+      // 1. Create SOP in DB
+      const created = await api.createSOP({
+        ...AppState.sopDraft,
+        status: 'draft',
+      });
+      // 2. Submit for approval
+      if (created?.id) {
+        await api.submitSOP(created.id);
+      }
       toast.success('SOP submitted for approval!', AppState.sopDraft.sop_number);
       setTimeout(() => navigate('#dashboard'), 1500);
-    } catch(e) {
+    } catch (e) {
       toast.error('Submission failed', e.message);
       submitBtn.innerHTML = `${icons.send.replace('width="20"','width="16"').replace('height="20"','height="16"')} Submit for Approval`;
       submitBtn.disabled = false;
@@ -472,7 +480,7 @@ async function saveDraft() {
   try {
     await api.createSOP({ ...AppState.sopDraft, status: 'draft' });
     toast.success('Draft saved successfully');
-  } catch(e) {
+  } catch (e) {
     toast.error('Failed to save draft', e.message);
   }
 }

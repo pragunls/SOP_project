@@ -296,9 +296,17 @@ export async function renderSopDetail(container, sopId) {
   // Edit button
   container.querySelector('#edit-btn')?.addEventListener('click', () => navigate('#new-sop'));
 
-  // Download
+  // Download PDF — real backend endpoint
   container.querySelector('#download-btn')?.addEventListener('click', () => {
-    toast.info('PDF generation is handled by the backend.', 'API endpoint: /api/sops/' + sopId + '/pdf/');
+    const url = api.getSOPPdfUrl(sopId);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${sop.sop_number || 'sop'}.pdf`;
+    a.target = '_blank';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    toast.info('Downloading PDF…', sop.sop_number);
   });
 
   // Approve/Reject buttons
