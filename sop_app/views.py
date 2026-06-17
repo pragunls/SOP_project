@@ -20,14 +20,11 @@ from .docx_generator import generate_sop_docx
 
 logger = logging.getLogger(__name__)
 
-
 def json_response(data, status=200):
     return JsonResponse(data, status=status, safe=False)
 
-
 def error_response(message, status=400):
     return JsonResponse({'error': message}, status=status)
-
 
 def get_request_user(request):
     """Return the authenticated user or the first superuser (dev fallback)."""
@@ -35,29 +32,23 @@ def get_request_user(request):
         return request.user
     return User.objects.filter(is_superuser=True).first() or User.objects.first()
 
-
-# ── Reference Data ───────────────────────────────────────────────
-
+# Reference Data
 class RefineryListView(View):
     def get(self, request):
         data = list(Refinery.objects.values('id', 'code', 'name', 'state'))
         return json_response(data)
-
 
 class DepartmentListView(View):
     def get(self, request):
         data = list(Department.objects.values('id', 'code', 'name'))
         return json_response(data)
 
-
 class ProcessUnitListView(View):
     def get(self, request):
         data = list(ProcessUnit.objects.values('id', 'code', 'name', 'full_name', 'description'))
         return json_response(data)
 
-
-# ── SOP CRUD ─────────────────────────────────────────────────────
-
+# SOP CRUD
 @method_decorator(csrf_exempt, name='dispatch')
 class SOPListCreateView(View):
     def get(self, request):
@@ -160,7 +151,6 @@ class SOPListCreateView(View):
 
         return json_response(serialize_sop_list(sop), status=201)
 
-
 def _fill_component(comp, data):
     import json as _json
     comp.type = data.get('type', 'text')
@@ -178,7 +168,6 @@ def _fill_component(comp, data):
     comp.chart_desc  = data.get('chartDesc', '') or ''
     if data.get('rows'):
         comp.table_rows = data['rows']
-
 
 @method_decorator(csrf_exempt, name='dispatch')
 class SOPDetailView(View):
@@ -209,9 +198,7 @@ class SOPDetailView(View):
     def patch(self, request, pk):
         return self.put(request, pk)
 
-
-# ── SOP Actions ──────────────────────────────────────────────────
-
+# SOP Actions
 @method_decorator(csrf_exempt, name='dispatch')
 class SOPSubmitView(View):
     def post(self, request, pk):
@@ -232,7 +219,6 @@ class SOPSubmitView(View):
                 )
 
         return json_response({'success': True, 'status': sop.status})
-
 
 @method_decorator(csrf_exempt, name='dispatch')
 class SOPApproveView(View):
@@ -290,7 +276,6 @@ class SOPApproveView(View):
 
         return json_response({'success': True, 'status': sop.status})
 
-
 @method_decorator(csrf_exempt, name='dispatch')
 class SOPRejectView(View):
     def post(self, request, pk):
@@ -329,7 +314,6 @@ class SOPRejectView(View):
 
         return json_response({'success': True, 'status': sop.status})
 
-
 class SOPDocxView(View):
     def get(self, request, pk):
         sop = get_object_or_404(
@@ -352,9 +336,7 @@ class SOPDocxView(View):
             logger.error(f'DOCX generation error: {e}')
             return error_response(str(e), 500)
 
-
-# ── PDF Download ──────────────────────────────────────────────────
-
+# PDF Download
 class SOPPDFView(View):
     def get(self, request, pk):
         sop = get_object_or_404(
@@ -374,9 +356,7 @@ class SOPPDFView(View):
             logger.error(f'PDF generation error: {e}')
             return error_response(str(e), 500)
 
-
-# ── Document Parse (PDF/DOCX upload) ────────────────────────────
-
+# Document Parse (PDF/DOCX upload)
 @method_decorator(csrf_exempt, name='dispatch')
 class DocumentParseView(View):
     """
@@ -400,9 +380,7 @@ class DocumentParseView(View):
         result = parse_document(file_bytes, filename)
         return json_response(result)
 
-
-# ── Notifications ─────────────────────────────────────────────────
-
+# Notifications
 @method_decorator(csrf_exempt, name='dispatch')
 class NotificationListView(View):
     def get(self, request):
@@ -418,7 +396,6 @@ class NotificationListView(View):
         Notification.objects.filter(user=user, is_read=False).update(is_read=True)
         return json_response({'success': True})
 
-
 @method_decorator(csrf_exempt, name='dispatch')
 class NotificationMarkReadView(View):
     def patch(self, request, pk):
@@ -428,9 +405,7 @@ class NotificationMarkReadView(View):
         notif.save()
         return json_response({'success': True})
 
-
-# ── Pending Approvals ─────────────────────────────────────────────
-
+# Pending Approvals
 class PendingApprovalsView(View):
     def get(self, request):
         user = get_request_user(request)
@@ -455,9 +430,7 @@ class PendingApprovalsView(View):
 
         return json_response(data)
 
-
-# ── Dashboard Stats ───────────────────────────────────────────────
-
+# Dashboard Stats
 class DashboardStatsView(View):
     def get(self, request):
         from django.utils import timezone

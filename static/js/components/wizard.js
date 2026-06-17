@@ -1,6 +1,4 @@
-/* ============================================================
-   SOP Portal — Wizard Step Manager
-   ============================================================ */
+/* SOP Portal — Wizard Step Manager */
 
 import { AppState } from '../state.js';
 import { icons } from './icons.js';

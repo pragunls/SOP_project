@@ -1,9 +1,7 @@
-/* ============================================================
-   SOP Portal — Reusable Components
-   Buttons, Inputs, Cards, Pills, Modals, Toasts, Skeletons
-   ============================================================ */
+/* SOP Portal — Reusable Components
+   Buttons, Inputs, Cards, Pills, Modals, Toasts, Skeletons */
 
-/* ── Buttons ── */
+/* Buttons */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -126,7 +124,7 @@
   to { transform: rotate(360deg); }
 }
 
-/* ── Form Inputs ── */
+/* Form Inputs */
 .input-field {
   width: 100%;
   height: 38px;
@@ -233,7 +231,7 @@ textarea.input-field {
   background-color: var(--color-bg);
 }
 
-/* ── Cards ── */
+/* Cards */
 .card {
   background: var(--color-surface);
   border-radius: var(--radius-md);
@@ -263,7 +261,7 @@ textarea.input-field {
   color: var(--color-text-primary);
 }
 
-/* ── Status Pills ── */
+/* Status Pills */
 .pill {
   display: inline-flex;
   align-items: center;
@@ -306,7 +304,7 @@ textarea.input-field {
   50%       { opacity: 0.72; }
 }
 
-/* ── Badge ── */
+/* Badge */
 .badge {
   display: inline-flex;
   align-items: center;
@@ -321,7 +319,7 @@ textarea.input-field {
   color: #FFFFFF;
 }
 
-/* ── Stat Card ── */
+/* Stat Card */
 .stat-card {
   display: flex;
   flex-direction: column;
@@ -389,7 +387,7 @@ textarea.input-field {
   gap: 3px;
 }
 
-/* ── Modal ── */
+/* Modal */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -468,7 +466,7 @@ textarea.input-field {
   border-top: 1px solid var(--color-border);
 }
 
-/* ── Toast Notifications ── */
+/* Toast Notifications */
 .toast-container {
   position: fixed;
   top: calc(var(--navbar-height) + 16px);
@@ -532,7 +530,7 @@ textarea.input-field {
   to   { width: 0%; }
 }
 
-/* ── Skeleton Loaders ── */
+/* Skeleton Loaders */
 .skeleton {
   background: linear-gradient(
     90deg,
@@ -567,7 +565,7 @@ textarea.input-field {
   border-radius: var(--radius-md);
 }
 
-/* ── Empty State ── */
+/* Empty State */
 .empty-state {
   display: flex;
   flex-direction: column;
@@ -595,7 +593,7 @@ textarea.input-field {
   max-width: 300px;
 }
 
-/* ── Checkbox ── */
+/* Checkbox */
 .checkbox-wrap {
   display: flex;
   align-items: flex-start;
@@ -619,7 +617,7 @@ textarea.input-field {
   line-height: 1.5;
 }
 
-/* ── Tag Input ── */
+/* Tag Input */
 .tag-input-wrap {
   display: flex;
   flex-wrap: wrap;
@@ -680,7 +678,7 @@ textarea.input-field {
   color: var(--color-text-primary);
 }
 
-/* ── Info Box ── */
+/* Info Box */
 .info-box {
   background: var(--color-primary-light);
   border-left: 3px solid var(--color-primary);
@@ -696,14 +694,14 @@ textarea.input-field {
   border-left-color: var(--color-warning);
 }
 
-/* ── Divider ── */
+/* Divider */
 .divider {
   height: 1px;
   background: var(--color-border);
   margin: var(--space-4) 0;
 }
 
-/* ── Toggle Switch ── */
+/* Toggle Switch */
 .toggle-group {
   display: inline-flex;
   border: 1px solid var(--color-border);
@@ -733,7 +731,7 @@ textarea.input-field {
   color: var(--color-primary);
 }
 
-/* ── Approval Timeline ── */
+/* Approval Timeline */
 .timeline {
   display: flex;
   flex-direction: column;
@@ -806,7 +804,7 @@ textarea.input-field {
   border-left: 3px solid var(--color-border);
 }
 
-/* ── Accordion ── */
+/* Accordion */
 .accordion-item {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
@@ -860,7 +858,7 @@ textarea.input-field {
   border-top: 1px solid var(--color-border);
 }
 
-/* ── Drag Handle ── */
+/* Drag Handle */
 .drag-handle {
   cursor: grab;
   color: var(--color-border);
@@ -880,7 +878,7 @@ textarea.input-field {
   cursor: grabbing;
 }
 
-/* ── Score Bar ── */
+/* Score Bar */
 .score-bar-track {
   height: 8px;
   background: var(--color-border);
@@ -896,7 +894,7 @@ textarea.input-field {
   transition: width 600ms ease;
 }
 
-/* ── Pagination ── */
+/* Pagination */
 .pagination {
   display: flex;
   align-items: center;
@@ -955,7 +953,7 @@ textarea.input-field {
   color: var(--color-text-primary);
 }
 
-/* ── Custom Dropdown ── */
+/* Custom Dropdown */
 .custom-dropdown {
   position: relative;
 }

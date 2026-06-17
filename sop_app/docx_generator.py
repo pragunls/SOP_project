@@ -10,7 +10,6 @@ from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
-
 def generate_sop_docx(sop) -> bytes:
     try:
         from docx import Document
@@ -24,7 +23,7 @@ def generate_sop_docx(sop) -> bytes:
 
     doc = Document()
 
-    # ── Page margins ──────────────────────────────────────────────
+    # Page margins
     for section in doc.sections:
         section.top_margin    = Cm(2.5)
         section.bottom_margin = Cm(2.5)
@@ -57,7 +56,7 @@ def generate_sop_docx(sop) -> bytes:
         pBdr.append(bottom)
         pPr.append(pBdr)
 
-    # ── Cover header table ────────────────────────────────────────
+    # Cover header table
     hdr_tbl = doc.add_table(rows=1, cols=2)
     hdr_tbl.style = 'Table Grid'
     hdr_tbl.autofit = False
@@ -80,7 +79,7 @@ def generate_sop_docx(sop) -> bytes:
     rr.font.size = Pt(9)
     doc.add_paragraph()
 
-    # ── Title ─────────────────────────────────────────────────────
+    # Title
     title_para = doc.add_paragraph()
     title_para.alignment = WD_ALIGN_PARAGRAPH.LEFT
     tr = title_para.add_run(sop.title)
@@ -91,7 +90,7 @@ def generate_sop_docx(sop) -> bytes:
 
     doc.add_paragraph()
 
-    # ── Metadata table ────────────────────────────────────────────
+    # Metadata table
     meta_rows = [
         ('Refinery',     sop.refinery.name     if sop.refinery     else '—',
          'Department',   sop.department.name   if sop.department   else '—'),
@@ -127,7 +126,7 @@ def generate_sop_docx(sop) -> bytes:
 
     doc.add_paragraph()
 
-    # ── Tags ──────────────────────────────────────────────────────
+    # Tags
     if sop.tags:
         tp = doc.add_paragraph()
         tr2 = tp.add_run(f'Tags: {" · ".join(sop.tags)}')
@@ -135,7 +134,7 @@ def generate_sop_docx(sop) -> bytes:
         tr2.font.color.rgb = MGRAY
         doc.add_paragraph()
 
-    # ── Sections ──────────────────────────────────────────────────
+    # Sections
     for section in sop.sections.all():
         # Section heading
         sh = doc.add_heading(section.name, level=1)
@@ -145,7 +144,7 @@ def generate_sop_docx(sop) -> bytes:
 
         for comp in section.components.all():
 
-            # ── Text ──────────────────────────────────────────────
+            # Text
             if comp.type == 'text' and comp.content:
                 html = comp.content
                 # Split on <p>, <br>, newlines
@@ -171,7 +170,7 @@ def generate_sop_docx(sop) -> bytes:
                     run.font.size = Pt(10)
                     run.font.color.rgb = DGRAY
 
-            # ── Numbered Steps (step type) ────────────────────────
+            # Numbered Steps (step type)
             elif comp.type == 'step':
                 steps = comp.content.split('\n') if comp.content else []
                 for i, step_text in enumerate(steps):
@@ -181,7 +180,7 @@ def generate_sop_docx(sop) -> bytes:
                         run.font.size = Pt(10)
                         run.font.color.rgb = DGRAY
 
-            # ── Table ─────────────────────────────────────────────
+            # Table
             elif comp.type == 'table' and comp.table_rows:
                 rows = comp.table_rows
                 if not rows:
@@ -209,7 +208,7 @@ def generate_sop_docx(sop) -> bytes:
                                 set_cell_bg(cell, 'F2F4F8')
                 doc.add_paragraph()
 
-            # ── Image / Chart ──────────────────────────────────────
+            # Image / Chart
             elif comp.type in ('image', 'chart') and comp.image_url:
                 try:
                     src = comp.image_url
@@ -241,7 +240,7 @@ def generate_sop_docx(sop) -> bytes:
 
         doc.add_paragraph()
 
-    # ── Approval Chain ────────────────────────────────────────────
+    # Approval Chain
     approval_steps = list(sop.approval_chain.all())
     if approval_steps:
         ah = doc.add_heading('Approval Chain', level=1)
@@ -277,7 +276,7 @@ def generate_sop_docx(sop) -> bytes:
                     set_cell_bg(cell, 'F2F4F8')
         doc.add_paragraph()
 
-    # ── Footer ────────────────────────────────────────────────────
+    # Footer
     fp = doc.add_paragraph()
     add_horizontal_line(fp, 'D0D7E3', 4)
     footer_run = fp.add_run(

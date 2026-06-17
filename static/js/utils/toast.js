@@ -1,6 +1,4 @@
-/* ============================================================
-   SOP Portal — Toast Notification Utility
-   ============================================================ */
+/* SOP Portal — Toast Notification Utility */
 
 let toastContainer = null;
 

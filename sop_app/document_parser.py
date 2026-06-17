@@ -10,7 +10,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-# ── Section keyword patterns ─────────────────────────────────────
+# Section keyword patterns
 SECTION_PATTERNS = [
     r'^\s*(introduction|purpose|scope|background|overview)\s*$',
     r'^\s*(procedure|procedures|method|process|steps|workflow)\s*$',
@@ -20,7 +20,6 @@ SECTION_PATTERNS = [
     r'^\s*(conclusion|summary|remarks?)\s*$',
     r'^\s*\d+[\.\)]\s*.{3,60}$',   # numbered section: "1. Introduction"
 ]
-
 
 def _looks_like_heading(text: str) -> bool:
     text = text.strip()
@@ -35,7 +34,6 @@ def _looks_like_heading(text: str) -> bool:
     if len(text) < 80 and text == text.upper() and len(text.split()) <= 6:
         return True
     return False
-
 
 def _build_sections(paragraphs: list) -> list:
     """
@@ -62,8 +60,7 @@ def _build_sections(paragraphs: list) -> list:
 
     return sections
 
-
-# ── PDF Parser ───────────────────────────────────────────────────
+# PDF Parser
 def parse_pdf(file_bytes: bytes) -> dict:
     """
     Returns:
@@ -125,8 +122,7 @@ def parse_pdf(file_bytes: bytes) -> dict:
         logger.error(f'PDF parse error: {e}')
         return _empty_result(str(e))
 
-
-# ── DOCX Parser ──────────────────────────────────────────────────
+# DOCX Parser
 def parse_docx(file_bytes: bytes) -> dict:
     """
     Returns same structure as parse_pdf.
@@ -233,7 +229,6 @@ def parse_docx(file_bytes: bytes) -> dict:
         logger.error(f'DOCX parse error: {e}')
         return _empty_result(str(e))
 
-
 def _empty_result(error_msg: str = '') -> dict:
     return {
         'title': '',
@@ -243,7 +238,6 @@ def _empty_result(error_msg: str = '') -> dict:
         'stats': {'text_blocks': 0, 'tables': 0, 'images': 0},
         'error': error_msg,
     }
-
 
 def parse_document(file_bytes: bytes, filename: str) -> dict:
     """Entry point. Detects format from filename extension."""

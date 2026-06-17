@@ -1,6 +1,4 @@
-/* ============================================================
-   SOP Portal — Dashboard Page Styles
-   ============================================================ */
+/* SOP Portal — Dashboard Page Styles */
 
 /* Stats Row */
 .stats-row {
@@ -331,7 +329,7 @@
   }
 }
 
-/* ── My SOPs stats row ── */
+/* My SOPs stats row */
 .my-sops-stat-row {
   display: flex;
   gap: var(--space-4);

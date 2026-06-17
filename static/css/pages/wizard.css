@@ -1,8 +1,6 @@
-/* ============================================================
-   SOP Portal — New SOP Wizard Styles
-   ============================================================ */
+/* SOP Portal — New SOP Wizard Styles */
 
-/* ── Step Indicator ── */
+/* Step Indicator */
 .wizard-steps-card {
   background: var(--color-surface);
   border-radius: var(--radius-md);
@@ -89,7 +87,7 @@
   color: var(--color-primary);
 }
 
-/* ── Step Panels ── */
+/* Step Panels */
 .wizard-pane   { display: none; }
 .wizard-pane.active { display: block; }
 
@@ -107,7 +105,7 @@
   margin-bottom: var(--space-6);
 }
 
-/* ── Step 1 — Location ── */
+/* Step 1 — Location */
 .step1-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -141,7 +139,7 @@
   pointer-events: none;
 }
 
-/* ── Step 2 — Units grid ── */
+/* Step 2 — Units grid */
 .unit-search-bar { margin-bottom: var(--space-5); }
 
 .units-grid {
@@ -224,7 +222,7 @@
   width: 100%;
 }
 
-/* ── Step 3 — Full SOP Builder ── */
+/* Step 3 — Full SOP Builder */
 .full-builder-wrap {
   display: grid;
   grid-template-columns: 260px 1fr;
@@ -356,7 +354,7 @@
 .fb-img-preview  { max-width: 100%; max-height: 240px; object-fit: contain; border-radius: var(--radius-sm); }
 .fb-table-controls { display: flex; gap: var(--space-3); flex-wrap: wrap; align-items: center; margin-bottom: var(--space-3); }
 
-/* ── Editable table in builder ── */
+/* Editable table in builder */
 .editable-table {
   border-collapse: collapse;
   width: 100%;
@@ -408,7 +406,7 @@
 .builder-main    { display: none !important; }
 .builder-centered-wrap { display: none !important; }
 
-/* ── Step 4 — Submit & Route ── */
+/* Step 4 — Submit & Route */
 .submit-summary-card {
   background: var(--color-bg);
   border: 1px solid var(--color-border);
@@ -480,7 +478,7 @@
   .approver-fields { grid-template-columns: 1fr; }
 }
 
-/* ── Wizard Nav ── */
+/* Wizard Nav */
 .wizard-nav {
   display: flex;
   align-items: center;

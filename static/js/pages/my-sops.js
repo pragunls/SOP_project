@@ -1,7 +1,5 @@
-/* ============================================================
-   SOP Portal — My SOPs Page
-   Shows all SOPs created by the current user.
-   ============================================================ */
+/* SOP Portal — My SOPs Page
+   Shows all SOPs created by the current user. */
 
 import { api }        from '../utils/api.js';
 import { AppState }   from '../state.js';

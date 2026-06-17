@@ -9,7 +9,6 @@ from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
-
 def generate_sop_pdf(sop) -> bytes:
     """
     Accepts an SOP model instance (with sections + components prefetched).
@@ -64,7 +63,7 @@ def generate_sop_pdf(sop) -> bytes:
 
     story = []
 
-    # ── Cover Header ────────────────────────────────────────────
+    # Cover Header
     header_data = [[
         Paragraph('HPCL — Standard Operating Procedure', style_header),
         Paragraph(sop.sop_number or 'DRAFT', S('MonoW', fontSize=9, fontName='Courier', textColor=colors.white, alignment=TA_RIGHT))
@@ -80,11 +79,11 @@ def generate_sop_pdf(sop) -> bytes:
     story.append(header_tbl)
     story.append(Spacer(1, 0.4*cm))
 
-    # ── Title ───────────────────────────────────────────────────
+    # Title
     story.append(Paragraph(sop.title, style_h1))
     story.append(HRFlowable(width='100%', thickness=2, color=RED, spaceAfter=8))
 
-    # ── Metadata table ──────────────────────────────────────────
+    # Metadata table
     meta_rows = [
         ['Refinery',    sop.refinery.name if sop.refinery else '—',
          'Department',  sop.department.name if sop.department else '—'],
@@ -117,14 +116,14 @@ def generate_sop_pdf(sop) -> bytes:
     story.append(meta_tbl)
     story.append(Spacer(1, 0.6*cm))
 
-    # ── Tags ─────────────────────────────────────────────────────
+    # Tags
     if sop.tags:
         story.append(Paragraph('Tags: ' + '  ·  '.join(sop.tags), style_meta))
         story.append(Spacer(1, 0.3*cm))
 
     story.append(HRFlowable(width='100%', thickness=0.5, color=colors.HexColor('#D0D7E3'), spaceAfter=10))
 
-    # ── Sections ─────────────────────────────────────────────────
+    # Sections
     for section in sop.sections.all():
         story.append(Paragraph(section.name, style_h2))
         story.append(HRFlowable(width='100%', thickness=1, color=colors.HexColor('#E8EEFA'), spaceAfter=4))
@@ -212,7 +211,7 @@ def generate_sop_pdf(sop) -> bytes:
 
         story.append(Spacer(1, 0.4*cm))
 
-    # ── Approval Chain ───────────────────────────────────────────
+    # Approval Chain
     approval_steps = list(sop.approval_chain.all())
     if approval_steps:
         story.append(Paragraph('Approval Chain', style_h2))
@@ -243,7 +242,7 @@ def generate_sop_pdf(sop) -> bytes:
         story.append(ap_tbl)
         story.append(Spacer(1, 0.5*cm))
 
-    # ── Footer note ──────────────────────────────────────────────
+    # Footer note
     story.append(HRFlowable(width='100%', thickness=0.5, color=colors.HexColor('#D0D7E3')))
     story.append(Paragraph(
         f'Generated: {datetime.now().strftime("%d %b %Y %H:%M")} | HPCL SOP Management Portal',
@@ -252,6 +251,5 @@ def generate_sop_pdf(sop) -> bytes:
 
     doc.build(story)
     return buf.getvalue()
-
 
 import re  # needed for HTML stripping above

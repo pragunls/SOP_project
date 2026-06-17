@@ -1,6 +1,4 @@
-/* ============================================================
-   SOP Portal — Dashboard Page
-   ============================================================ */
+/* SOP Portal — Dashboard Page */
 
 import { AppState } from '../state.js';
 import { api } from '../utils/api.js';

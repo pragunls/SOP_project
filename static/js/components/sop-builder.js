@@ -1,15 +1,13 @@
-/* ============================================================
-   SOP Portal — Full SOP Builder (Step 3)
+/* SOP Portal — Full SOP Builder (Step 3)
    6 required sections: Introduction, Scope, Procedure,
    Safety & Precautions, Results/Observations, Conclusion
-   Each section: rich text, numbered steps, tables, images/charts
-   ============================================================ */
+   Each section: rich text, numbered steps, tables, images/charts */
 
 import { AppState } from '../state.js';
 import { api }      from '../utils/api.js';
 import { toast }    from '../utils/toast.js';
 
-// ── Section definitions ──────────────────────────────────────────
+// Section definitions
 const REQUIRED_SECTIONS = [
   { key: 'introduction',  name: 'Introduction',           icon: 'info',        hint: 'Purpose and background of this SOP.' },
   { key: 'scope',         name: 'Scope',                  icon: 'file-text',   hint: 'Applicability, boundaries and responsible parties.' },
@@ -22,7 +20,7 @@ const REQUIRED_SECTIONS = [
 let _compId = 1000;
 function nextId() { return ++_compId; }
 
-// ── Main render ──────────────────────────────────────────────────
+// Main render
 export function renderSopBuilder(container) {
   const draft = AppState.sopDraft;
 
@@ -48,7 +46,7 @@ function ensureRequiredSections() {
   }
 }
 
-// ── HTML skeleton ────────────────────────────────────────────────
+// HTML skeleton
 function builderHTML(draft) {
   const activeId = draft.activeSectionId;
   return `
@@ -185,7 +183,7 @@ function builderHTML(draft) {
   `;
 }
 
-// ── Component card HTML ──────────────────────────────────────────
+// Component card HTML
 function componentCard(comp) {
   const badges = { text:'badge-text', step:'badge-chart', table:'badge-table', image:'badge-image' };
   const labels = { text:'Text', step:'Numbered Steps', table:'Table', image:'Image / Chart' };
@@ -305,7 +303,7 @@ function editableTable(comp) {
   </table>`;
 }
 
-// ── Event wiring ─────────────────────────────────────────────────
+// Event wiring
 function attachAllEvents(container) {
   // Section nav
   container.addEventListener('click', e => {
@@ -428,7 +426,7 @@ function attachAllEvents(container) {
   initDragToReorder(container);
 }
 
-// ── Section switching ─────────────────────────────────────────────
+// Section switching
 function switchSection(sectionId, container) {
   AppState.sopDraft.activeSectionId = sectionId;
   container.querySelectorAll('[data-section-panel]').forEach(p =>
@@ -440,7 +438,7 @@ function switchSection(sectionId, container) {
   });
 }
 
-// ── Component CRUD ────────────────────────────────────────────────
+// Component CRUD
 function addComponent(type, sectionId, container) {
   const sec = AppState.sopDraft.sections.find(s => s.id === sectionId);
   if (!sec) return;
@@ -503,7 +501,7 @@ function updateNavBadge(sectionId, container) {
   }
 }
 
-// ── State syncing ─────────────────────────────────────────────────
+// State syncing
 function syncRte(compId, html) { syncProp(compId, 'content', html); }
 function syncWeight(compId, val) { syncProp(compId, 'weight', Math.min(9, Math.max(0, Number(val)||0))); }
 function syncProp(compId, prop, val) {
@@ -516,7 +514,7 @@ function findComp(compId) {
   return null;
 }
 
-// ── Numbered steps ────────────────────────────────────────────────
+// Numbered steps
 function addStep_fn(compId, container) {
   const comp = findComp(compId);
   if (!comp) return;
@@ -549,7 +547,7 @@ function deleteStep(key, container) {
   });
 }
 
-// ── Table operations ──────────────────────────────────────────────
+// Table operations
 function generateTable(compId, container) {
   const rowsEl = container.querySelector(`[data-tbl-rows="${compId}"]`);
   const colsEl = container.querySelector(`[data-tbl-cols="${compId}"]`);
@@ -580,7 +578,7 @@ function rerenderTable(comp, container) {
   if (wrap) wrap.innerHTML = editableTable(comp);
 }
 
-// ── Drag-to-reorder components ────────────────────────────────────
+// Drag-to-reorder components
 let dragSrc = null;
 function initDragToReorder(container) {
   container.querySelectorAll('.fb-comp-card').forEach(card => {
@@ -608,7 +606,7 @@ function initDragToReorder(container) {
   });
 }
 
-// ── Document import ───────────────────────────────────────────────
+// Document import
 async function processImport(file, container) {
   const ext = file.name.split('.').pop().toLowerCase();
   if (!['pdf','docx','doc'].includes(ext)) {
@@ -676,7 +674,7 @@ function showStatus(container, type, html) {
   el.innerHTML = html;
 }
 
-// ── Helpers ───────────────────────────────────────────────────────
+// Helpers
 function i(name, size='20') {
   const map = {
     'cloud-upload': `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>`,

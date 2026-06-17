@@ -1,6 +1,4 @@
-/* ============================================================
-   SOP Portal — Sidebar Component
-   ============================================================ */
+/* SOP Portal — Sidebar Component */
 
 import { AppState } from '../state.js';
 import { icons } from './icons.js';

@@ -2,7 +2,6 @@ from django.db import models
 from django.contrib.auth.models import User
 import json
 
-
 class Refinery(models.Model):
     code = models.CharField(max_length=10, unique=True)
     name = models.CharField(max_length=100)
@@ -14,14 +13,12 @@ class Refinery(models.Model):
     class Meta:
         verbose_name_plural = "Refineries"
 
-
 class Department(models.Model):
     code = models.CharField(max_length=10, unique=True)
     name = models.CharField(max_length=100)
 
     def __str__(self):
         return self.name
-
 
 class ProcessUnit(models.Model):
     code = models.CharField(max_length=20, unique=True)
@@ -31,7 +28,6 @@ class ProcessUnit(models.Model):
 
     def __str__(self):
         return f"{self.name} — {self.full_name}"
-
 
 class SOP(models.Model):
     STATUS_CHOICES = [
@@ -81,7 +77,6 @@ class SOP(models.Model):
     class Meta:
         ordering = ['-submitted_date']
 
-
 class SOPSection(models.Model):
     sop      = models.ForeignKey(SOP, on_delete=models.CASCADE, related_name='sections')
     name     = models.CharField(max_length=200)
@@ -92,7 +87,6 @@ class SOPSection(models.Model):
 
     class Meta:
         ordering = ['order']
-
 
 class SOPComponent(models.Model):
     TYPE_CHOICES = [
@@ -136,7 +130,6 @@ class SOPComponent(models.Model):
     class Meta:
         ordering = ['order']
 
-
 class ApprovalStep(models.Model):
     STATUS_CHOICES = [
         ('pending',  'Pending'),
@@ -157,7 +150,6 @@ class ApprovalStep(models.Model):
 
     class Meta:
         ordering = ['step']
-
 
 class Notification(models.Model):
     TYPE_CHOICES = [

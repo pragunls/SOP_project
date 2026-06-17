@@ -1,7 +1,5 @@
-/* ============================================================
-   SOP Portal — New SOP Page (Multi-Step Wizard)
-   Steps: 1 Location → 2 Unit → 3 Build SOP → 4 Review & Submit
-   ============================================================ */
+/* SOP Portal — New SOP Page (Multi-Step Wizard)
+   Steps: 1 Location → 2 Unit → 3 Build SOP → 4 Review & Submit */
 
 import { AppState }        from '../state.js';
 import { icons }           from '../components/icons.js';
@@ -177,7 +175,7 @@ export function renderNewSop(container) {
   initStep4(container);
 }
 
-// ── Step 1 ──────────────────────────────────────────────────────
+// Step 1
 function initStep1(container) {
   const refineryDd      = container.querySelector('#refinery-dropdown');
   const refineryTrigger = container.querySelector('#refinery-trigger');
@@ -267,7 +265,7 @@ function checkStep1Next(container) {
   btn.setAttribute('aria-disabled', !ok);
 }
 
-// ── Step 2 ──────────────────────────────────────────────────────
+// Step 2
 function initStep2(container) {
   container.querySelector('#step2-back')?.addEventListener('click', () => showWizardStep(1));
 
@@ -334,7 +332,7 @@ function selectUnit(card, container) {
   next.removeAttribute('aria-disabled');
 }
 
-// ── Step 3 ──────────────────────────────────────────────────────
+// Step 3
 function initStep3(container) {
   container.querySelector('#step3-back')?.addEventListener('click', () => showWizardStep(2));
   container.querySelector('#step3-draft')?.addEventListener('click', saveDraft);
@@ -350,7 +348,7 @@ function initStep3(container) {
   });
 }
 
-// ── Step 4 ──────────────────────────────────────────────────────
+// Step 4
 function initStep4(container) {
   container.querySelector('#step4-back')?.addEventListener('click', () => showWizardStep(3));
   container.querySelector('#step4-draft')?.addEventListener('click', saveDraft);

@@ -1,8 +1,6 @@
-/* ============================================================
-   SOP Portal — Main App Entry Point & Router
-   ============================================================ */
+/* SOP Portal — Main App Entry Point & Router */
 
-// ── Company Logo — replace path with your actual logo ──
+// Company Logo — replace path with your actual logo
 const COMPANY_LOGO = '/static/assets/Hindustan_Petroleum_Logo.svg';
 
 import { AppState }       from './state.js';
@@ -16,10 +14,10 @@ import { renderMySOPs }      from './pages/my-sops.js';
 import { toast }             from './utils/toast.js';
 import { api }               from './utils/api.js';
 
-// ── Notification state ──
+// Notification state
 let notifData = { notifications: [], unread_count: 0 };
 
-// ── Shell Init ──
+// Shell Init
 function initShell() {
   const navbar = document.getElementById('navbar');
   if (!navbar) return;
@@ -87,7 +85,7 @@ function initShell() {
   initNotifications();
 }
 
-// ── Notification Bell ──
+// Notification Bell
 async function initNotifications() {
   const btn   = document.getElementById('notif-btn');
   const panel = document.getElementById('notif-panel');
@@ -223,7 +221,7 @@ window.handleNotifClick = async function(notifId, sopId) {
   else loadNotifications();
 };
 
-// ── Router ──
+// Router
 const routes = {
   '#dashboard': () => loadPage(renderDashboard),
   '#new-sop':   () => loadPage(renderNewSop),
@@ -273,7 +271,7 @@ function handleRoute() {
   else navigate('#dashboard');
 }
 
-// ── Stub pages ──
+// Stub pages
 function renderAdmin(container) {
   container.innerHTML = stubPage('Admin', 'User management, refinery configuration, and system settings.', '#settings', 'Go to Settings');
 }
@@ -305,7 +303,7 @@ function stubPage(title, text, ctaHash, ctaLabel) {
   `;
 }
 
-// ── Helpers ──
+// Helpers
 window.navigate = (hash) => { window.location.hash = hash; };
 
 function timeAgo(isoStr) {
@@ -326,7 +324,7 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
-// ── Bootstrap ──
+// Bootstrap
 document.addEventListener('DOMContentLoaded', () => {
   initShell();
   window.addEventListener('hashchange', handleRoute);

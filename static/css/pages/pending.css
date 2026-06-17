@@ -1,9 +1,7 @@
-/* ============================================================
-   SOP Portal — Pending Approvals Page + Notification Panel
-   + Document Upload (sop-builder additions)
-   ============================================================ */
+/* SOP Portal — Pending Approvals Page + Notification Panel
+   + Document Upload (sop-builder additions) */
 
-/* ── Pending Approvals Page ── */
+/* Pending Approvals Page */
 .pending-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
@@ -92,7 +90,7 @@
   justify-content: center;
 }
 
-/* ── Notification Panel ── */
+/* Notification Panel */
 .notif-panel {
   position: fixed;
   top: calc(var(--navbar-height) + 8px);
@@ -237,7 +235,7 @@
   }
 }
 
-/* ── Document Upload in Builder Sidebar ── */
+/* Document Upload in Builder Sidebar */
 .doc-upload-panel {
   display: flex;
   flex-direction: column;

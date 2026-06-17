@@ -1,7 +1,5 @@
-/* ============================================================
-   SOP Portal — Global State
-   Persists across router navigations via in-memory object.
-   ============================================================ */
+/* SOP Portal — Global State
+   Persists across router navigations via in-memory object. */
 
 export const AppState = {
   // Current user
@@ -94,7 +92,7 @@ export const AppState = {
     'Operations Director',
   ],
 
-  // ── Helper methods ──
+  // Helper methods
 
   resetDraft() {
     this.sopDraft = {

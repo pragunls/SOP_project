@@ -1,11 +1,9 @@
-/* ============================================================
-   SOP Portal — API Utility
-   Real Django backend calls + mock fallback for dev
-   ============================================================ */
+/* SOP Portal — API Utility
+   Real Django backend calls + mock fallback for dev */
 
 const API_BASE = '/api';
 
-// ── Generic fetch wrapper ──
+// Generic fetch wrapper
 async function apiFetch(path, options = {}) {
   const defaults = {
     headers: {
@@ -34,7 +32,7 @@ function getCsrfToken() {
   return cookie ? cookie.trim().split('=')[1] : '';
 }
 
-// ── API Methods ──
+// API Methods
 export const api = {
   // Stats
   async getDashboardStats() {

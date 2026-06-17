@@ -2,7 +2,6 @@ import json
 from django.contrib.auth.models import User
 from .models import SOP, SOPSection, SOPComponent, ApprovalStep, Notification, Refinery, Department, ProcessUnit
 
-
 def serialize_component(comp):
     import json as _json
     steps = None
@@ -27,7 +26,6 @@ def serialize_component(comp):
         'rows': comp.table_rows if comp.type == 'table' else None,
     }
 
-
 def serialize_section(section):
     return {
         'id': section.id,
@@ -35,7 +33,6 @@ def serialize_section(section):
         'order': section.order,
         'components': [serialize_component(c) for c in section.components.all()],
     }
-
 
 def serialize_approval_step(step):
     return {
@@ -47,7 +44,6 @@ def serialize_approval_step(step):
         'comment': step.comment,
         'approval_type': step.approval_type,
     }
-
 
 def serialize_sop_list(sop):
     return {
@@ -63,7 +59,6 @@ def serialize_sop_list(sop):
         'version': sop.version,
     }
 
-
 def serialize_sop_detail(sop):
     data = serialize_sop_list(sop)
     data.update({
@@ -77,7 +72,6 @@ def serialize_sop_detail(sop):
         ],
     })
     return data
-
 
 def serialize_notification(notif):
     return {

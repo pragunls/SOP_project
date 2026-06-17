@@ -1,7 +1,5 @@
-/* ============================================================
-   SOP Portal — Approval Chain Builder (Step 4)
-   Manual approver assignment — drag-to-reorder
-   ============================================================ */
+/* SOP Portal — Approval Chain Builder (Step 4)
+   Manual approver assignment — drag-to-reorder */
 
 import { AppState } from '../state.js';
 import { icons } from './icons.js';

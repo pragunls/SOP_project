@@ -1,6 +1,4 @@
-/* ============================================================
-   SOP Portal — SOP Detail View Page
-   ============================================================ */
+/* SOP Portal — SOP Detail View Page */
 
 import { AppState } from '../state.js';
 import { api } from '../utils/api.js';

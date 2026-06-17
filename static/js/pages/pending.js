@@ -1,6 +1,4 @@
-/* ============================================================
-   SOP Portal — Pending Approvals Page
-   ============================================================ */
+/* SOP Portal — Pending Approvals Page */
 
 import { api }   from '../utils/api.js';
 import { icons } from '../components/icons.js';

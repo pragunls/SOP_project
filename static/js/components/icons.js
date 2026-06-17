@@ -1,7 +1,5 @@
-/* ============================================================
-   SOP Portal — Inline SVG Icon Set (Lucide-style)
-   All icons: 20x20 viewBox, stroke-based, currentColor
-   ============================================================ */
+/* SOP Portal — Inline SVG Icon Set (Lucide-style)
+   All icons: 20x20 viewBox, stroke-based, currentColor */
 
 const ico = (d) =>
   `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
