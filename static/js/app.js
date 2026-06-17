@@ -8,12 +8,13 @@ const COMPANY_LOGO = '/static/assets/Hindustan_Petroleum_Logo.svg';
 import { AppState }       from './state.js';
 import { initSidebar }    from './components/sidebar.js';
 import { icons }          from './components/icons.js';
-import { renderDashboard }  from './pages/dashboard.js';
-import { renderNewSop }     from './pages/new-sop.js';
-import { renderSopDetail }  from './pages/sop-detail.js';
+import { renderDashboard }   from './pages/dashboard.js';
+import { renderNewSop }      from './pages/new-sop.js';
+import { renderSopDetail }   from './pages/sop-detail.js';
 import { renderPendingPage } from './pages/pending.js';
-import { toast }           from './utils/toast.js';
-import { api }             from './utils/api.js';
+import { renderMySOPs }      from './pages/my-sops.js';
+import { toast }             from './utils/toast.js';
+import { api }               from './utils/api.js';
 
 // ── Notification state ──
 let notifData = { notifications: [], unread_count: 0 };
@@ -273,9 +274,6 @@ function handleRoute() {
 }
 
 // ── Stub pages ──
-function renderMySOPs(container) {
-  container.innerHTML = stubPage('My SOPs', 'Your submitted and drafted SOPs will appear here.', '#new-sop', 'Create New SOP');
-}
 function renderAdmin(container) {
   container.innerHTML = stubPage('Admin', 'User management, refinery configuration, and system settings.', '#settings', 'Go to Settings');
 }

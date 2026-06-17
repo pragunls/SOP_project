@@ -78,6 +78,13 @@ class SOPListCreateView(View):
         if status:
             qs = qs.filter(status=status)
 
+        # Filter by current user's SOPs
+        mine = request.GET.get('mine', '')
+        if mine:
+            current_user = get_request_user(request)
+            if current_user:
+                qs = qs.filter(prepared_by=current_user)
+
         # Stats
         from django.db.models import Count
         from django.utils import timezone

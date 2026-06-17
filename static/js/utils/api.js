@@ -48,6 +48,7 @@ export const api = {
     if (filters.refinery)   params.set('refinery',   filters.refinery);
     if (filters.department) params.set('department', filters.department);
     if (filters.status)     params.set('status',     filters.status);
+    if (filters.mine)       params.set('mine',       '1');
     const qs = params.toString();
     return apiFetch(`/sops/${qs ? '?' + qs : ''}`);
   },
