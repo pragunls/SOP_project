@@ -1090,3 +1090,83 @@ textarea.input-field {
 .tab-pane.active {
   display: block;
 }
+
+
+/* Login Page */
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-primary);
+  padding: var(--space-4);
+}
+
+.login-card {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-modal);
+  padding: var(--space-8) var(--space-8);
+  width: 100%;
+  max-width: 400px;
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: var(--space-8);
+}
+
+.login-logo {
+  height: 48px;
+  margin: 0 auto var(--space-4);
+  display: block;
+}
+
+.login-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin-bottom: 4px;
+}
+
+.login-subtitle {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.login-error {
+  background: var(--color-accent-light);
+  color: var(--color-danger);
+  border: 1px solid #FECACA;
+  border-radius: var(--radius-sm);
+  padding: var(--space-3) var(--space-4);
+  font-size: 13px;
+}
+
+.pw-toggle-btn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  padding: 4px;
+}
+.pw-toggle-btn:hover { color: var(--color-primary); }
+
+.login-footer {
+  text-align: center;
+  margin-top: var(--space-6);
+  font-size: 11px;
+  color: var(--color-text-secondary);
+}

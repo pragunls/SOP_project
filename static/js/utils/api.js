@@ -1,24 +1,13 @@
-/* SOP Portal — API Utility
-   Real Django backend calls + mock fallback for dev */
+/* SOP Portal — API Utility */
 
 const API_BASE = '/api';
 
-// Generic fetch wrapper
 async function apiFetch(path, options = {}) {
-  const defaults = {
-    headers: {
-      'X-CSRFToken': getCsrfToken(),
-    },
-  };
-  // Don't set Content-Type for FormData (browser sets multipart boundary)
+  const defaults = { headers: { 'X-CSRFToken': getCsrfToken() } };
   if (!(options.body instanceof FormData)) {
     defaults.headers['Content-Type'] = 'application/json';
   }
-  const merged = {
-    ...defaults,
-    ...options,
-    headers: { ...defaults.headers, ...(options.headers || {}) },
-  };
+  const merged = { ...defaults, ...options, headers: { ...defaults.headers, ...(options.headers || {}) } };
   const response = await fetch(API_BASE + path, merged);
   if (!response.ok) {
     const text = await response.text().catch(() => '');
@@ -32,12 +21,22 @@ function getCsrfToken() {
   return cookie ? cookie.trim().split('=')[1] : '';
 }
 
-// API Methods
 export const api = {
-  // Stats
-  async getDashboardStats() {
-    return apiFetch('/stats/');
+  // Auth
+  async login(username, password) {
+    return apiFetch('/auth/login/', { method: 'POST', body: JSON.stringify({ username, password }) });
   },
+  async logout() { return apiFetch('/auth/logout/', { method: 'POST' }); },
+  async getMe()  { return apiFetch('/auth/me/'); },
+
+  // User management
+  async getUsers()          { return apiFetch('/users/'); },
+  async createUser(data)    { return apiFetch('/users/', { method: 'POST', body: JSON.stringify(data) }); },
+  async updateUser(id, data){ return apiFetch(`/users/${id}/`, { method: 'PUT', body: JSON.stringify(data) }); },
+  async deleteUser(id)      { return apiFetch(`/users/${id}/`, { method: 'DELETE' }); },
+
+  // Stats
+  async getDashboardStats() { return apiFetch('/stats/'); },
 
   // SOPs
   async getSOPs(filters = {}) {
@@ -50,48 +49,19 @@ export const api = {
     const qs = params.toString();
     return apiFetch(`/sops/${qs ? '?' + qs : ''}`);
   },
-
-  async getSOPDetail(id) {
-    return apiFetch(`/sops/${id}/`);
-  },
-
-  async createSOP(data) {
-    return apiFetch('/sops/', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
-  },
-
-  async updateSOP(id, data) {
-    return apiFetch(`/sops/${id}/`, {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    });
-  },
-
-  async submitSOP(id) {
-    return apiFetch(`/sops/${id}/submit/`, { method: 'POST' });
-  },
-
+  async getSOPDetail(id) { return apiFetch(`/sops/${id}/`); },
+  async createSOP(data)  { return apiFetch('/sops/', { method: 'POST', body: JSON.stringify(data) }); },
+  async submitSOP(id)    { return apiFetch(`/sops/${id}/submit/`, { method: 'POST' }); },
   async approveSOP(id, comment = '') {
-    return apiFetch(`/sops/${id}/approve/`, {
-      method: 'POST',
-      body: JSON.stringify({ comment }),
-    });
+    return apiFetch(`/sops/${id}/approve/`, { method: 'POST', body: JSON.stringify({ comment }) });
   },
-
   async rejectSOP(id, comment) {
-    return apiFetch(`/sops/${id}/reject/`, {
-      method: 'POST',
-      body: JSON.stringify({ comment }),
-    });
+    return apiFetch(`/sops/${id}/reject/`, { method: 'POST', body: JSON.stringify({ comment }) });
   },
-
-  // PDF/DOCX download — returns a URL to open directly
   getSOPPdfUrl(id)  { return `${API_BASE}/sops/${id}/pdf/`; },
   getSOPDocxUrl(id) { return `${API_BASE}/sops/${id}/docx/`; },
 
-  // Parse uploaded PDF/DOCX → sections JSON
+  // Document parse
   async parseDocument(file) {
     const form = new FormData();
     form.append('file', file);
@@ -99,22 +69,12 @@ export const api = {
   },
 
   // Notifications
-  async getNotifications() {
-    return apiFetch('/notifications/');
-  },
+  async getNotifications()        { return apiFetch('/notifications/'); },
+  async markNotificationRead(id)  { return apiFetch(`/notifications/${id}/read/`, { method: 'PATCH' }); },
+  async markAllNotificationsRead(){ return apiFetch('/notifications/', { method: 'PATCH' }); },
 
-  async markNotificationRead(id) {
-    return apiFetch(`/notifications/${id}/read/`, { method: 'PATCH' });
-  },
-
-  async markAllNotificationsRead() {
-    return apiFetch('/notifications/', { method: 'PATCH' });
-  },
-
-  // Pending approvals (full page)
-  async getPendingApprovals() {
-    return apiFetch('/pending-approvals/');
-  },
+  // Pending approvals
+  async getPendingApprovals() { return apiFetch('/pending-approvals/'); },
 
   // Reference data
   async getRefineries()  { return apiFetch('/refineries/'); },

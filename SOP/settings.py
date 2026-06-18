@@ -55,6 +55,14 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+# Allow SPA to read CSRF cookie via JS
+CSRF_COOKIE_HTTPONLY = False
+CSRF_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SAMESITE = 'Lax'
+
+# Ensure CSRF cookie is set on every request
+CSRF_COOKIE_SECURE = False  # dev only
+
 ROOT_URLCONF = 'SOP.urls'
 
 TEMPLATES = [

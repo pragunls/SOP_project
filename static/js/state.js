@@ -2,13 +2,14 @@
    Persists across router navigations via in-memory object. */
 
 export const AppState = {
-  // Current user
+  // Current user — populated after login via /api/auth/me/
   currentUser: {
-    id: 1,
-    name: 'Rajesh Kumar',
-    initials: 'RK',
-    role: 'Process Engineer',
-    email: 'r.kumar@hpcl.in',
+    id:       null,
+    name:     '',
+    initials: '',
+    role:     'user',
+    email:    '',
+    username: '',
   },
 
   // Wizard draft state — persists across steps
@@ -103,7 +104,7 @@ export const AppState = {
       sop_number: '',
       version: '1.0',
       effective_date: '',
-      prepared_by: this.currentUser.name,
+      prepared_by: this.currentUser.name || '',
       tags: [],
       sections: [
         { id: 1,  key: 'introduction', name: 'Introduction',           components: [] },

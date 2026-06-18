@@ -84,3 +84,39 @@ def serialize_notification(notif):
         'is_read': notif.is_read,
         'created_at': notif.created_at.isoformat(),
     }
+
+
+def serialize_user_profile(user):
+    try:
+        profile = user.profile
+        role     = profile.role
+        dept     = profile.department.name if profile.department else ''
+        dept_code= profile.department.code if profile.department else ''
+        ref      = profile.refinery.name   if profile.refinery   else ''
+        ref_code = profile.refinery.code   if profile.refinery   else ''
+        mgr      = profile.managed_by.get_full_name() if profile.managed_by else ''
+    except Exception:
+        role = 'admin' if user.is_superuser else 'user'
+        dept = dept_code = ref = ref_code = mgr = ''
+
+    name = user.get_full_name() or user.username
+    parts = name.split()
+    initials = (parts[0][0] + parts[-1][0]).upper() if len(parts) >= 2 else name[:2].upper()
+
+    return {
+        'id':          user.id,
+        'username':    user.username,
+        'name':        name,
+        'first_name':  user.first_name,
+        'last_name':   user.last_name,
+        'email':       user.email,
+        'initials':    initials,
+        'role':        role,
+        'department':  dept,
+        'department_code': dept_code,
+        'refinery':    ref,
+        'refinery_code': ref_code,
+        'managed_by':  mgr,
+        'is_active':   user.is_active,
+        'date_joined': user.date_joined.isoformat(),
+    }

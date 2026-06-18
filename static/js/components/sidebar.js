@@ -4,12 +4,12 @@ import { AppState } from '../state.js';
 import { icons } from './icons.js';
 
 const NAV_ITEMS = [
-  { id: 'dashboard',         label: 'Dashboard',          hash: '#dashboard',  icon: 'dashboard' },
-  { id: 'new-sop',           label: 'New SOP',            hash: '#new-sop',    icon: 'plus-circle' },
-  { id: 'my-sops',           label: 'My SOPs',            hash: '#my-sops',    icon: 'file-text' },
-  { id: 'pending-approvals', label: 'Pending Approvals',  hash: '#pending',    icon: 'clock' },
-  { id: 'admin',             label: 'Admin',              hash: '#admin',      icon: 'settings-2' },
-  { id: 'settings',          label: 'Settings',           hash: '#settings',   icon: 'settings' },
+  { id: 'dashboard',         label: 'Dashboard',         hash: '#dashboard', icon: 'dashboard',   roles: ['admin','manager','user'] },
+  { id: 'new-sop',           label: 'New SOP',           hash: '#new-sop',   icon: 'plus-circle', roles: ['admin','manager','user'] },
+  { id: 'my-sops',           label: 'My SOPs',           hash: '#my-sops',   icon: 'file-text',   roles: ['admin','manager','user'] },
+  { id: 'pending-approvals', label: 'Pending Approvals', hash: '#pending',   icon: 'clock',       roles: ['admin','manager','user'] },
+  { id: 'admin',             label: 'User Management',   hash: '#admin',     icon: 'settings-2',  roles: ['admin','manager'] },
+  { id: 'settings',          label: 'Settings',          hash: '#settings',  icon: 'settings',    roles: ['admin','manager','user'] },
 ];
 
 export function initSidebar() {
@@ -51,10 +51,12 @@ export function initSidebar() {
 }
 
 function renderNavItems(sidebar) {
-  const nav = sidebar.querySelector('.sidebar-nav');
+  const nav  = sidebar.querySelector('.sidebar-nav');
   if (!nav) return;
+  const role = AppState.currentUser?.role || 'user';
 
   NAV_ITEMS.forEach(item => {
+    if (!item.roles.includes(role)) return;
     const el = document.createElement('a');
     el.className = 'nav-item';
     el.href = item.hash;
