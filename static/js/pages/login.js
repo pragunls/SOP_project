@@ -7,14 +7,26 @@ import { AppState } from '../state.js';
 const COMPANY_LOGO = '/static/assets/Hindustan_Petroleum_Logo.svg';
 
 export function renderLogin() {
-  document.body.innerHTML = `
+  const root = document.getElementById('app-root');
+  if (!root) return;
+
+  root.innerHTML = `
     <div class="login-page" role="main">
       <div class="login-card">
 
         <div class="login-header">
           <img src="${COMPANY_LOGO}" alt="HPCL Logo" class="login-logo"
-            onerror="this.style.display='none'" />
-          <h1 class="login-title">SOP Portal</h1>
+            onerror="this.style.display='none';document.getElementById('login-logo-fallback').style.display='flex';" />
+          <div id="login-logo-fallback" class="navbar-logo-fallback"
+            style="display:none;margin:0 auto var(--space-3);background:var(--color-primary);">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white"
+              stroke-width="2" stroke-linecap="round">
+              <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+              <polyline points="2 17 12 22 22 17"/>
+              <polyline points="2 12 12 17 22 12"/>
+            </svg>
+          </div>
+          <h1 class="login-title">SOP Login</h1>
           <p class="login-subtitle">HPCL — Standard Operating Procedures</p>
         </div>
 
@@ -61,12 +73,12 @@ export function renderLogin() {
     </div>
   `;
 
-  const form      = document.getElementById('login-form');
-  const userInput = document.getElementById('login-username');
-  const pwInput   = document.getElementById('login-password');
-  const errEl     = document.getElementById('login-error');
-  const submitBtn = document.getElementById('login-btn');
-  const togglePw  = document.getElementById('toggle-pw');
+  const form      = root.querySelector('#login-form');
+  const userInput = root.querySelector('#login-username');
+  const pwInput   = root.querySelector('#login-password');
+  const errEl     = root.querySelector('#login-error');
+  const submitBtn = root.querySelector('#login-btn');
+  const togglePw  = root.querySelector('#toggle-pw');
 
   // Show/hide password
   togglePw.addEventListener('click', () => {

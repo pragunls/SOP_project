@@ -2,79 +2,84 @@
 
 const COMPANY_LOGO = '/static/assets/Hindustan_Petroleum_Logo.svg';
 
-import { AppState }         from './state.js';
-import { initSidebar }      from './components/sidebar.js';
-import { icons }            from './components/icons.js';
-import { renderLogin }      from './pages/login.js';
-import { renderDashboard }  from './pages/dashboard.js';
-import { renderNewSop }     from './pages/new-sop.js';
-import { renderSopDetail }  from './pages/sop-detail.js';
+import { AppState }          from './state.js';
+import { initSidebar }       from './components/sidebar.js';
+import { icons }             from './components/icons.js';
+import { renderLogin }       from './pages/login.js';
+import { renderDashboard }   from './pages/dashboard.js';
+import { renderNewSop }      from './pages/new-sop.js';
+import { renderSopDetail }   from './pages/sop-detail.js';
 import { renderPendingPage } from './pages/pending.js';
-import { renderMySOPs }     from './pages/my-sops.js';
-import { renderAdminPage }  from './pages/admin.js';
-import { toast }            from './utils/toast.js';
-import { api }              from './utils/api.js';
+import { renderMySOPs }      from './pages/my-sops.js';
+import { renderAdminPage }   from './pages/admin.js';
+import { toast }             from './utils/toast.js';
+import { api }               from './utils/api.js';
 
 let notifData = { notifications: [], unread_count: 0 };
 
-// Auth — check if user is logged in, else show login
+/* ── Auth bootstrap ─────────────────────────────────────────── */
 async function initAuth() {
   try {
-    const userData = await api.getMe();
-    AppState.currentUser = {
-      id:       userData.id,
-      name:     userData.name,
-      initials: userData.initials,
-      role:     userData.role,
-      email:    userData.email,
-      username: userData.username,
-    };
+    const user = await api.getMe();
+    setCurrentUser(user);
     bootApp();
   } catch {
-    // Not authenticated — show login
-    renderLogin();
-    // Listen for successful login event
-    window.addEventListener('auth:login', (e) => {
-      AppState.currentUser = {
-        id:       e.detail.id,
-        name:     e.detail.name,
-        initials: e.detail.initials,
-        role:     e.detail.role,
-        email:    e.detail.email,
-        username: e.detail.username,
-      };
-      bootApp();
-    }, { once: true });
+    showLoginPage();
   }
 }
 
-// Boot the shell after authentication
-function bootApp() {
-  // Restore full HTML shell if login page replaced it
-  if (!document.getElementById('navbar')) {
-    document.body.innerHTML = `
-      <header id="navbar" class="navbar" role="banner"></header>
-      <div id="sidebar-overlay" class="sidebar-overlay" role="presentation" aria-hidden="true"></div>
-      <aside id="sidebar" class="sidebar" role="navigation" aria-label="Site navigation">
-        <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Collapse sidebar">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-            stroke-width="3" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
-        </button>
-        <nav class="sidebar-nav" role="list" aria-label="Main menu">
-          <div class="sidebar-section-label" aria-hidden="true">Navigation</div>
-        </nav>
-        <div class="sidebar-user" aria-label="Current user"></div>
-      </aside>
-      <main id="main-content" class="main-content" role="main">
-        <div id="page-content"></div>
-      </main>`;
-  }
+function setCurrentUser(data) {
+  AppState.currentUser = {
+    id:       data.id,
+    name:     data.name,
+    initials: data.initials,
+    role:     data.role,
+    email:    data.email,
+    username: data.username,
+  };
+}
 
+function showLoginPage() {
+  document.title = 'SOP Login';
+  const root = document.getElementById('app-root');
+  if (root) root.innerHTML = '';
+  renderLogin();
+  window.addEventListener('auth:login', e => {
+    setCurrentUser(e.detail);
+    bootApp();
+  }, { once: true });
+}
+
+/* ── Boot full app shell ─────────────────────────────────────── */
+function bootApp() {
+  document.title = 'SOP Portal — HPCL';
+  const root = document.getElementById('app-root');
+  root.innerHTML = `
+    <header id="navbar" class="navbar" role="banner"></header>
+    <div id="sidebar-overlay" class="sidebar-overlay" role="presentation" aria-hidden="true"></div>
+    <aside id="sidebar" class="sidebar" role="navigation" aria-label="Site navigation">
+      <button id="sidebar-toggle" class="sidebar-toggle"
+        aria-label="Collapse sidebar" title="Collapse sidebar">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+      </button>
+      <nav class="sidebar-nav" role="list" aria-label="Main menu">
+        <div class="sidebar-section-label" aria-hidden="true">Navigation</div>
+      </nav>
+      <div class="sidebar-user" aria-label="Current user"></div>
+    </aside>
+    <main id="main-content" class="main-content" role="main" aria-label="Page content">
+      <div id="page-content"></div>
+    </main>
+  `;
   initShell();
   window.addEventListener('hashchange', handleRoute);
   handleRoute();
 }
 
+/* ── Shell (navbar + sidebar) ───────────────────────────────── */
 function initShell() {
   const navbar = document.getElementById('navbar');
   if (!navbar) return;
@@ -82,7 +87,8 @@ function initShell() {
 
   navbar.innerHTML = `
     <div class="navbar-brand">
-      <button class="hamburger-btn" id="hamburger-btn" aria-label="Open navigation" aria-expanded="false">
+      <button class="hamburger-btn" id="hamburger-btn"
+        aria-label="Open navigation" aria-expanded="false">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
           stroke-width="2" stroke-linecap="round">
           <line x1="3" y1="6" x2="21" y2="6"/>
@@ -95,8 +101,8 @@ function initShell() {
         onload="this.style.display='block';this.nextElementSibling.style.display='none';"
         onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
       <div class="navbar-logo-fallback" aria-hidden="true">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"
-          stroke-linecap="round">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white"
+          stroke-width="2" stroke-linecap="round">
           <polygon points="12 2 2 7 12 12 22 7 12 2"/>
           <polyline points="2 17 12 22 22 17"/>
           <polyline points="2 12 12 17 22 12"/>
@@ -104,18 +110,22 @@ function initShell() {
       </div>
       <span class="navbar-title">SOP</span>
     </div>
+
     <div class="navbar-right">
-      <button class="navbar-icon-btn" id="notif-btn" aria-label="Notifications" aria-haspopup="true" aria-expanded="false">
-        <span class="notification-badge" id="notif-badge" style="display:none;" role="status"></span>
+      <button class="navbar-icon-btn" id="notif-btn"
+        aria-label="Notifications" aria-haspopup="true" aria-expanded="false">
+        <span class="notification-badge" id="notif-badge"
+          style="display:none;" role="status"></span>
         ${icons.bell}
       </button>
-      <div class="user-chip" role="button" tabindex="0" aria-label="${u.name} — ${u.role}" title="${u.name}">
+      <div class="user-chip" role="button" tabindex="0"
+        aria-label="${u.name} — ${u.role}" title="${u.name}">
         <div class="user-avatar" aria-hidden="true">${u.initials}</div>
         <span class="user-name">${u.name}</span>
         <span class="role-badge">${u.role}</span>
       </div>
-      <button class="navbar-icon-btn" id="logout-btn" aria-label="Sign out" title="Sign out"
-        style="margin-left:4px;">
+      <button class="navbar-icon-btn" id="logout-btn"
+        aria-label="Sign out" title="Sign out" style="margin-left:4px;">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
           stroke-width="2" stroke-linecap="round">
           <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
@@ -125,30 +135,33 @@ function initShell() {
       </button>
     </div>
 
-    <!-- Notification panel -->
-    <div class="notif-panel" id="notif-panel" role="dialog" aria-label="Notifications" aria-hidden="true">
+    <div class="notif-panel" id="notif-panel"
+      role="dialog" aria-label="Notifications" aria-hidden="true">
       <div class="notif-panel-header">
         <span class="notif-panel-title">Notifications</span>
         <button class="btn btn-ghost btn-sm" id="notif-mark-all" type="button"
           style="font-size:12px;padding:4px 8px;">Mark all read</button>
       </div>
       <div class="notif-panel-body" id="notif-list">
-        <div style="padding:32px;text-align:center;color:var(--color-text-secondary);font-size:13px;">Loading…</div>
+        <div style="padding:32px;text-align:center;color:var(--color-text-secondary);font-size:13px;">
+          Loading…
+        </div>
       </div>
     </div>
   `;
 
-  // Logout
+  /* Logout — clear session then reload to show login */
   document.getElementById('logout-btn')?.addEventListener('click', async () => {
-    await api.logout().catch(() => {});
-    window.location.reload();
+    try { await api.logout(); } catch { /* ignore */ }
+    AppState.currentUser = { id: null, name: '', initials: '', role: 'user', email: '', username: '' };
+    showLoginPage();
   });
 
   initSidebar();
   initNotifications();
 }
 
-// Notifications
+/* ── Notifications ───────────────────────────────────────────── */
 async function initNotifications() {
   const btn   = document.getElementById('notif-btn');
   const panel = document.getElementById('notif-panel');
@@ -161,6 +174,7 @@ async function initNotifications() {
     panel.setAttribute('aria-hidden', !isOpen);
     if (isOpen) loadNotifications();
   });
+
   document.addEventListener('click', e => {
     if (!panel.contains(e.target) && e.target !== btn) {
       panel.classList.remove('open');
@@ -168,10 +182,12 @@ async function initNotifications() {
       panel.setAttribute('aria-hidden', 'true');
     }
   });
+
   document.getElementById('notif-mark-all')?.addEventListener('click', async () => {
     await api.markAllNotificationsRead().catch(() => {});
     loadNotifications();
   });
+
   await loadNotifications();
 }
 
@@ -186,10 +202,13 @@ async function loadNotifications() {
     const count = notifData.unread_count;
     if (count > 0) {
       badge.textContent = count > 9 ? '9+' : count;
-      badge.style.cssText = `display:flex;align-items:center;justify-content:center;
-        position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;padding:0 4px;
-        background:var(--color-accent);color:#fff;border-radius:var(--radius-pill);
-        font-size:10px;font-weight:700;border:2px solid var(--color-primary);`;
+      badge.style.cssText = `
+        display:flex;align-items:center;justify-content:center;
+        position:absolute;top:-4px;right:-4px;
+        min-width:18px;height:18px;padding:0 4px;
+        background:var(--color-accent);color:#fff;
+        border-radius:var(--radius-pill);font-size:10px;font-weight:700;
+        border:2px solid var(--color-primary);`;
     } else {
       badge.style.display = 'none';
     }
@@ -201,22 +220,23 @@ function renderNotifList(notifications) {
   const list = document.getElementById('notif-list');
   if (!list) return;
   if (!notifications.length) {
-    list.innerHTML = `<div class="notif-empty">
-      ${icons.bell.replace('width="20"','width="32"').replace('height="20"','height="32"')}
-      <div style="font-size:13px;font-weight:500;margin-top:8px;">No notifications</div>
-      <div style="font-size:12px;color:var(--color-text-secondary);">You're all caught up!</div>
-    </div>`;
+    list.innerHTML = `
+      <div class="notif-empty">
+        ${icons.bell.replace('width="20"','width="32"').replace('height="20"','height="32"')}
+        <div style="font-size:13px;font-weight:500;margin-top:8px;">No notifications</div>
+        <div style="font-size:12px;color:var(--color-text-secondary);">You're all caught up!</div>
+      </div>`;
     return;
   }
   const typeColor = {
     approval_request: 'var(--color-warning)',
-    approved: 'var(--color-success)',
-    rejected: 'var(--color-danger)',
-    draft_reminder: 'var(--color-primary)',
-    info: 'var(--color-primary)',
+    approved:         'var(--color-success)',
+    rejected:         'var(--color-danger)',
+    draft_reminder:   'var(--color-primary)',
+    info:             'var(--color-primary)',
   };
   list.innerHTML = notifications.map(n => `
-    <div class="notif-item ${n.is_read ? '' : 'unread'}" data-notif-id="${n.id}"
+    <div class="notif-item ${n.is_read ? '' : 'unread'}"
       role="button" tabindex="0"
       onclick="handleNotifClick(${n.id}, ${n.sop_id || 'null'})">
       <div class="notif-icon" style="color:${typeColor[n.type]||'var(--color-primary)'}">
@@ -238,7 +258,7 @@ window.handleNotifClick = async (notifId, sopId) => {
   else loadNotifications();
 };
 
-// Router
+/* ── Router ─────────────────────────────────────────────────── */
 const routes = {
   '#dashboard': () => loadPage(renderDashboard),
   '#new-sop':   () => loadPage(renderNewSop),
@@ -263,13 +283,17 @@ async function loadPage(renderFn) {
   try {
     await renderFn(main);
   } catch (e) {
-    console.error('Page render error:', e);
+    console.error('Page error:', e);
     main.innerHTML = `
       <div class="empty-state">
-        <div class="empty-state-icon">${icons['alert-circle'].replace('width="20"','width="48"').replace('height="20"','height="48"')}</div>
+        <div class="empty-state-icon">
+          ${icons['alert-circle'].replace('width="20"','width="48"').replace('height="20"','height="48"')}
+        </div>
         <div class="empty-state-title">Something went wrong</div>
         <div class="empty-state-text">${esc(e.message)}</div>
-        <button class="btn btn-primary" onclick="navigate('#dashboard')">Back to Dashboard</button>
+        <button class="btn btn-primary" onclick="navigate('#dashboard')">
+          Back to Dashboard
+        </button>
       </div>`;
   }
 }
@@ -287,27 +311,34 @@ function handleRoute() {
 }
 
 function renderSettings(container) {
-  container.innerHTML = stubPage('Settings', 'Account preferences coming soon.', '#dashboard', 'Back to Dashboard');
+  container.innerHTML = stubPage(
+    'Settings', 'Account preferences coming soon.', '#dashboard', 'Back to Dashboard'
+  );
 }
 
 function stubPage(title, text, ctaHash, ctaLabel) {
   return `
     <nav class="breadcrumb">
-      <span class="breadcrumb-item" onclick="navigate('#dashboard')" tabindex="0" role="link">Dashboard</span>
+      <span class="breadcrumb-item" onclick="navigate('#dashboard')"
+        tabindex="0" role="link">Dashboard</span>
       <span class="breadcrumb-separator">›</span>
       <span class="breadcrumb-item active">${title}</span>
     </nav>
-    <div class="page-header"><div class="page-header-left">
-      <h1 class="page-title">${title}</h1>
-      <p class="page-subtitle">${text}</p>
-    </div></div>
-    <div class="empty-state" style="background:var(--color-surface);border-radius:var(--radius-md);box-shadow:var(--shadow-card);padding:64px;">
+    <div class="page-header">
+      <div class="page-header-left">
+        <h1 class="page-title">${title}</h1>
+        <p class="page-subtitle">${text}</p>
+      </div>
+    </div>
+    <div class="empty-state" style="background:var(--color-surface);
+      border-radius:var(--radius-md);box-shadow:var(--shadow-card);padding:64px;">
       <div class="empty-state-title">${title}</div>
       <div class="empty-state-text">${text}</div>
       <button class="btn btn-primary" onclick="navigate('${ctaHash}')">${ctaLabel}</button>
     </div>`;
 }
 
+/* ── Helpers ─────────────────────────────────────────────────── */
 window.navigate = hash => { window.location.hash = hash; };
 
 function timeAgo(isoStr) {
@@ -324,9 +355,9 @@ function timeAgo(isoStr) {
 
 function esc(str) {
   const d = document.createElement('div');
-  d.textContent = String(str||'');
+  d.textContent = String(str || '');
   return d.innerHTML;
 }
 
-// Boot on load
+/* ── Bootstrap ───────────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', initAuth);

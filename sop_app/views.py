@@ -28,10 +28,10 @@ def error_response(message, status=400):
     return JsonResponse({'error': message}, status=status)
 
 def get_request_user(request):
-    """Return the authenticated user or first user as dev fallback."""
+    """Return authenticated user or None. No dev fallback — auth is required."""
     if request.user.is_authenticated:
         return request.user
-    return User.objects.filter(is_superuser=True).first() or User.objects.first()
+    return None
 
 
 def get_user_role(user):
@@ -73,6 +73,8 @@ class ProcessUnitListView(View):
 @method_decorator(csrf_exempt, name='dispatch')
 class SOPListCreateView(View):
     def get(self, request):
+        if not request.user.is_authenticated:
+            return error_response('Not authenticated', 401)
         qs = SOP.objects.select_related('refinery', 'department', 'unit', 'prepared_by')
 
         # Filters
@@ -90,12 +92,9 @@ class SOPListCreateView(View):
         if status:
             qs = qs.filter(status=status)
 
-        # Filter by current user's SOPs
         mine = request.GET.get('mine', '')
         if mine:
-            current_user = get_request_user(request)
-            if current_user:
-                qs = qs.filter(prepared_by=current_user)
+            qs = qs.filter(prepared_by=request.user)
 
         # Stats
         from django.db.models import Count
@@ -113,12 +112,14 @@ class SOPListCreateView(View):
         return json_response({'results': sops, 'count': len(sops), 'stats': stats})
 
     def post(self, request):
+        if not request.user.is_authenticated:
+            return error_response('Not authenticated', 401)
         try:
             data = json.loads(request.body)
         except json.JSONDecodeError:
             return error_response('Invalid JSON')
 
-        user = get_request_user(request)
+        user = request.user
 
         with transaction.atomic():
             # Resolve FK refs
@@ -227,7 +228,7 @@ class SOPSubmitView(View):
         sop.status = 'review'
         sop.save()
 
-        # Notify first approver(s)
+        prepared = sop.prepared_by
         first_steps = sop.approval_chain.filter(step=1)
         for step in first_steps:
             if step.approver:
@@ -235,10 +236,9 @@ class SOPSubmitView(View):
                     user=step.approver,
                     type='approval_request',
                     title=f'Approval required: {sop.sop_number}',
-                    message=f'{sop.prepared_by.get_full_name() if sop.prepared_by else "Someone"} submitted "{sop.title}" for your approval.',
+                    message=f'{prepared.get_full_name() if prepared else "Someone"} submitted "{sop.title}" for your approval.',
                     sop=sop,
                 )
-
         return json_response({'success': True, 'status': sop.status})
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -246,20 +246,17 @@ class SOPApproveView(View):
     def post(self, request, pk):
         from django.utils import timezone
         sop = get_object_or_404(SOP, pk=pk)
-        user = get_request_user(request)
+        user = request.user if request.user.is_authenticated else None
 
         try:
             data = json.loads(request.body)
         except Exception:
             data = {}
 
-        # Find the pending step for this user
-        step = sop.approval_chain.filter(
-            status='pending', approver=user
-        ).order_by('step').first()
-
+        step = None
+        if user:
+            step = sop.approval_chain.filter(status='pending', approver=user).order_by('step').first()
         if not step:
-            # For dev: approve the first pending step
             step = sop.approval_chain.filter(status='pending').order_by('step').first()
 
         if step:
@@ -268,12 +265,10 @@ class SOPApproveView(View):
             step.timestamp = timezone.now()
             step.save()
 
-        # Check if all approved
         pending_count = sop.approval_chain.filter(status='pending').count()
         if pending_count == 0:
             sop.status = 'approved'
             sop.save()
-            # Notify submitter
             if sop.prepared_by:
                 Notification.objects.create(
                     user=sop.prepared_by,
@@ -283,7 +278,6 @@ class SOPApproveView(View):
                     sop=sop,
                 )
         else:
-            # Notify next approver (sequential)
             if step:
                 next_step = sop.approval_chain.filter(step=step.step + 1, status='pending').first()
                 if next_step and next_step.approver:
@@ -294,7 +288,6 @@ class SOPApproveView(View):
                         message=f'Step {step.step} approved. Your review is required.',
                         sop=sop,
                     )
-
         return json_response({'success': True, 'status': sop.status})
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -302,7 +295,6 @@ class SOPRejectView(View):
     def post(self, request, pk):
         from django.utils import timezone
         sop = get_object_or_404(SOP, pk=pk)
-        user = get_request_user(request)
 
         try:
             data = json.loads(request.body)
@@ -323,16 +315,14 @@ class SOPRejectView(View):
         sop.status = 'rejected'
         sop.save()
 
-        # Notify submitter
         if sop.prepared_by:
             Notification.objects.create(
                 user=sop.prepared_by,
                 type='rejected',
                 title=f'SOP Rejected: {sop.sop_number}',
-                message=f'Your SOP "{sop.title}" was rejected. Comment: {comment}',
+                message=f'Your SOP "{sop.title}" was rejected. Reason: {comment}',
                 sop=sop,
             )
-
         return json_response({'success': True, 'status': sop.status})
 
 class SOPDocxView(View):
@@ -405,23 +395,26 @@ class DocumentParseView(View):
 @method_decorator(csrf_exempt, name='dispatch')
 class NotificationListView(View):
     def get(self, request):
-        user = get_request_user(request)
+        if not request.user.is_authenticated:
+            return error_response('Not authenticated', 401)
+        user = request.user
         notifs = Notification.objects.filter(user=user).select_related('sop')[:50]
         data = [serialize_notification(n) for n in notifs]
         unread = sum(1 for n in notifs if not n.is_read)
         return json_response({'notifications': data, 'unread_count': unread})
 
     def patch(self, request):
-        """Mark all as read."""
-        user = get_request_user(request)
-        Notification.objects.filter(user=user, is_read=False).update(is_read=True)
+        if not request.user.is_authenticated:
+            return error_response('Not authenticated', 401)
+        Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
         return json_response({'success': True})
 
 @method_decorator(csrf_exempt, name='dispatch')
 class NotificationMarkReadView(View):
     def patch(self, request, pk):
-        user = get_request_user(request)
-        notif = get_object_or_404(Notification, pk=pk, user=user)
+        if not request.user.is_authenticated:
+            return error_response('Not authenticated', 401)
+        notif = get_object_or_404(Notification, pk=pk, user=request.user)
         notif.is_read = True
         notif.save()
         return json_response({'success': True})
@@ -429,7 +422,9 @@ class NotificationMarkReadView(View):
 # Pending Approvals
 class PendingApprovalsView(View):
     def get(self, request):
-        user = get_request_user(request)
+        if not request.user.is_authenticated:
+            return error_response('Not authenticated', 401)
+        user = request.user
         steps = ApprovalStep.objects.filter(
             approver=user, status='pending'
         ).select_related('sop__refinery', 'sop__department', 'sop__unit', 'sop__prepared_by')
@@ -498,10 +493,9 @@ class LogoutView(View):
 
 class MeView(View):
     def get(self, request):
-        user = get_request_user(request)
-        if not user:
+        if not request.user.is_authenticated:
             return error_response('Not authenticated', 401)
-        return json_response(_serialize_me(user))
+        return json_response(_serialize_me(request.user))
 
 
 def _serialize_me(user):
