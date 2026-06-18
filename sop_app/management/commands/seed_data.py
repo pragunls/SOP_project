@@ -16,9 +16,8 @@ class Command(BaseCommand):
         # Refineries
         refineries = [
             ('MUM', 'Mumbai Refinery',          'Maharashtra'),
-            ('VIZ', 'Vishakhapatnam Refinery',  'Andhra Pradesh'),
-            ('MUN', 'Mundra Refinery',           'Gujarat'),
-            ('BAT', 'Bathinda Refinery',         'Punjab'),
+            ('VIZ', 'Visakhapatnam Refinery',   'Andhra Pradesh'),
+            ('RAJ', 'Rajasthan Refinery',        'Rajasthan'),
         ]
         for code, name, state in refineries:
             Refinery.objects.get_or_create(code=code, defaults={'name': name, 'state': state})
@@ -155,8 +154,7 @@ class Command(BaseCommand):
 
         # ── Additional mock SOPs ──────────────────────────────────
         ref_viz  = Refinery.objects.get(code='VIZ')
-        ref_mun  = Refinery.objects.get(code='MUN')
-        ref_bat  = Refinery.objects.get(code='BAT')
+        ref_raj  = Refinery.objects.get(code='RAJ')
         dept_mnt = Department.objects.get(code='MNT')
         dept_pro = Department.objects.get(code='PRO')
         dept_qc  = Department.objects.get(code='QC')
@@ -170,18 +168,18 @@ class Command(BaseCommand):
         extra_sops = [
             ('SOP-VIZ-OPS-FCC-2025-001', 'FCC Regenerator Temperature Control',
              ref_viz, dept_ops, unit_fcc, users['venkat.rao'], 'draft', ['temperature','control']),
-            ('SOP-MUN-PRO-HCU-2025-001', 'Hydrocracker Feed Rate Optimization',
-             ref_mun, dept_pro, unit_hcu, users['arjun.patel'], 'rejected', ['optimization','feed']),
-            ('SOP-BAT-MNT-VDU-2025-001', 'Vacuum Distillation Column Maintenance Protocol',
-             ref_bat, dept_mnt, unit_vdu, users['gurpreet.singh'], 'approved', ['maintenance','vdu']),
+            ('SOP-RAJ-PRO-HCU-2025-001', 'Hydrocracker Feed Rate Optimization',
+             ref_raj, dept_pro, unit_hcu, users['arjun.patel'], 'rejected', ['optimization','feed']),
+            ('SOP-RAJ-MNT-VDU-2025-001', 'Vacuum Distillation Column Maintenance Protocol',
+             ref_raj, dept_mnt, unit_vdu, users['gurpreet.singh'], 'approved', ['maintenance','vdu']),
             ('SOP-MUM-OPS-CCR-2025-001', 'CCR Catalyst Regeneration Procedure',
              ref_mum, dept_ops, unit_ccr, users['priya.sharma'], 'review', ['catalyst','ccr']),
             ('SOP-VIZ-HSE-ARU-2025-002', 'Amine Recovery Unit H2S Monitoring',
              ref_viz, dept_hse, unit_aru, users['venkat.rao'], 'approved', ['h2s','monitoring','aru']),
-            ('SOP-MUN-OPS-SRU-2025-001', 'Sulphur Recovery Unit Startup Checklist',
-             ref_mun, dept_ops, unit_sru, users['arjun.patel'], 'draft', ['startup','sulphur']),
-            ('SOP-BAT-QC-NHT-2025-001', 'NHT Feed Quality Specification Verification',
-             ref_bat, dept_qc, unit_nht, users['gurpreet.singh'], 'approved', ['quality','nht']),
+            ('SOP-RAJ-OPS-SRU-2025-001', 'Sulphur Recovery Unit Startup Checklist',
+             ref_raj, dept_ops, unit_sru, users['arjun.patel'], 'draft', ['startup','sulphur']),
+            ('SOP-RAJ-QC-NHT-2025-001', 'NHT Feed Quality Specification Verification',
+             ref_raj, dept_qc, unit_nht, users['gurpreet.singh'], 'approved', ['quality','nht']),
             ('SOP-MUM-PRO-CDU-2025-003', 'Crude Distillation Throughput Optimization',
              ref_mum, dept_pro, unit_cdu, users['rajesh.kumar'], 'review', ['throughput','cdu']),
         ]
